@@ -2,7 +2,10 @@ Changes
 lib/List/BinarySearch.pm
 Makefile.PL
 MANIFEST            This list of files
+MANIFEST.SKIP
 README
+META.json
+META.yml
 t/00-load.t
 t/manifest.t
 t/pod-coverage.t

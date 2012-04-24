@@ -1,9 +1,12 @@
-#!perl -T
+#!/usr/bin/env perl
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 BEGIN {
-    use_ok( 'List::BinarySearch' ) || print "Bail out!\n";
+    use_ok( 'Scalar::Util' ) || BAIL_OUT();
+    use_ok( 'List::BinarySearch' ) || BAIL_OUT();
 }
 
-diag( "Testing List::BinarySearch $List::BinarySearch::VERSION, Perl $], $^X" );
+diag( "Testing List::BinarySearch " .
+      "$List::BinarySearch::VERSION, Perl $], $^X"
+);
