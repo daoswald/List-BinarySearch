@@ -32,6 +32,36 @@ $VERSION = eval $VERSION;
 This module performs a binary search on an array passed by reference, or on
 an array or list passed as a flat list.
 
+The binary search algorithm implemented in this module provides stable
+searches (deferred detection).  Stable binary search algorithms have the
+following characteristics, contrasted with their unstable binary search
+cousins:
+
+=over 4
+
+=item * In the case of non-unique keys, a stable binary search will
+always return the lowest-indexed matching element.  An unstable binary search
+would return the first one found, which may not be the chronological first.
+
+=item * Best and worst case time complexity is always O(log n).  Unstable
+searches may find the target in fewer iterations in the best case, but in the
+worst case would still be O(log n).
+
+=item * Stable binary searches only require one relational comparison per
+iteration, where unstable binary searches require two conditionals per
+iteration.
+
+=item * The net result is that although an unstable binary search might have
+a better "best case" time complexity, the fact that a stable binary search
+gets away with fewer comparisons per iteration gives it better performance
+in the worst case, and approximately equal performance in the average case.
+By trading away slightly better "best case" performance, the stable search
+gains the guarantee that the element found will always be the lowest-indexed
+element in a range of non-unique keys.
+
+=back
+
+
 Examples:
 
     use List::BinarySearch qw( bsearch_array bsearch_list );
@@ -49,7 +79,7 @@ Examples:
     $index = bsearch_list( $target, @array );
 
     # Search an array passed as a flat list, using a custom comparator.
-    $index = bsearch_list( $target, @array, sub { $_[0] cmp $_[1] } );
+    $index = bsearch_list( $sub{ $_[0] cmp $_[1] }, $target, @array );
 
     # Returns undef:
     $index = bsearch_array( \@array, 250 );  # 250 isn't found in @array.
@@ -141,6 +171,12 @@ sub bsearch_list {
 
 =head2 \&comparator
 (callback)
+
+Comparators are references to functions that accept as parameters a target,
+and a list element, returning the result of the relational comparison of the
+two values.  A good example would be the code block in a C<sort> function,
+except that our comparators get their input from C<@_>, where C<sort>'s
+comparator functions get their input from C<$a> and C<$b>.
 
 
 The default comparators are defined like this:
