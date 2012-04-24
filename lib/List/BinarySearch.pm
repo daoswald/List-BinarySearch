@@ -23,8 +23,8 @@ Developer's Release
 
 =cut
 
-our $VERSION = 0.01_001;
-$VERSION = eval $VERSION;
+our $VERSION = '0.01_001';
+$VERSION = eval $VERSION; ## no critic (eval)
 
 
 =head1 SYNOPSIS
@@ -61,7 +61,6 @@ element in a range of non-unique keys.
 
 =back
 
-
 Examples:
 
     use List::BinarySearch qw( bsearch_array bsearch_list );
@@ -89,6 +88,22 @@ Examples:
 
 Nothing is exported by default.  Upon request will export C<bsearch_array>,
 C<bsearch_list>, or both functions by specifying C<:all>.
+
+=head1 RATIONALE
+
+Before using this module the user should weigh the other options: linear
+searches ( C<grep> or C<List::Util::first> ), or hash based searches.
+A binary search only makes sense if the data set is already sorted in
+ascending order, and if it is determined that the cost of a linear search, or
+the linear-time conversion to a hash-based container is too inefficient.  So
+often, it just doesn't make sense to try to optimize beyond what Perl's tools
+natively provide.
+
+However, in some cases, a binary search can be an excellent choice.  Finding
+the first matching element in a list of 1,000,000 items with a linear search
+would have a worst-case of 1,000,000 iterations, whereas the worst case for
+a binary search of 1,000,000 elements is about 20 iterations.
+
 
 =head1 SUBROUTINES/METHODS
 
@@ -133,7 +148,7 @@ sub bsearch_array {
     }
     return $min
         if $max == $min && $code->( $target, $aref->[$min] ) == 0;
-    return undef;
+    return;  # Undef in scalar context, empty list in list context.
 }
 
 
@@ -202,7 +217,35 @@ comparison logic.  A custom comparator function should return:
 
 =cut
 
+=head1 DATA SET REQUIREMENTS
 
+A well written general algorithm should place as few demands on its data as
+practical.  The two requirements that these Binary Search algorithms impose
+are:
+
+=over 4
+
+=item * The lists must be in ascending sorted order.
+
+This is a big one.  Keep in mind that the best sort routines run in O(n log n)
+time.  It makes no sense to sort a list in O(n log n), and then perform a
+single O(log n) binary search when List::Util C<first> could accomplish the
+same thing in O(n) time.  A Binary Search only makes sense if there are other
+good reasons for keeping the data set sorted in the first place.
+
+=item * Passing an unsorted list to these Binary Search algorithms will result
+in undefined behavior.
+
+A Binary Search consumes O(log n) time.  It would, therefore, be foolish for
+these algorithms to pre-check the list for sortedness, as that would require
+linear, or O(n) time.  Since no sortedness testing is done, there can be no
+guarantees as to what will happen if an unsorted list is passed to a binary
+search.
+
+=item * Data that is more complex than simple numeric or string lists will
+require a custom comparator.
+
+=back
 
 =head1 AUTHOR
 

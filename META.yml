@@ -3,7 +3,7 @@ abstract: Binary Search a sorted list or array.
 author:
   - 'David Oswald <davido@cpan.org>'
 build_requires:
-  ExtUtils::MakeMaker: 0
+  Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 0
 dynamic_config: 1
@@ -18,5 +18,5 @@ no_index:
     - t
     - inc
 requires:
-  Test::More: 0
-version: 0.01001
+  Scalar::Util: 0
+version: 0.01_001
