@@ -23,12 +23,12 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.01_001
+Version 0.01_002
 Developer's Release
 
 =cut
 
-our $VERSION = '0.01_001';
+our $VERSION = '0.01_002';
 $VERSION = eval $VERSION;    ## no critic (eval,version)
 
 =head1 SYNOPSIS
@@ -278,7 +278,7 @@ C<$unknown> such that C<$structure[$unknown][0] == 200> might look like this:
 =head1 DATA SET REQUIREMENTS
 
 A well written general algorithm should place as few demands on its data as
-practical.  The two requirements that these Binary Search algorithms impose
+practical.  The three requirements that these Binary Search algorithms impose
 are:
 
 =over 4

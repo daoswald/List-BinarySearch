@@ -19,4 +19,4 @@ no_index:
     - inc
 requires:
   Scalar::Util: 0
-version: 0.01_001
+version: 0.01_002

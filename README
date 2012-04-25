@@ -2,7 +2,7 @@ List-BinarySearch
 
 Perform a binary search on a flat list or an array passed by reference.
 
-v0.01_001 is a developer's release.
+v0.01_002 is a developer's release.
 
 INSTALLATION
 
@@ -12,6 +12,11 @@ To install this module, run the following commands:
     make
     make test
     make install
+
+DEPENDENCIES
+
+There are no non-core dependencies.
+This module has not been tested on Perl versions older than 5.6.0.
 
 SUPPORT AND DOCUMENTATION
 

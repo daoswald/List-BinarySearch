@@ -4,3 +4,12 @@ Revision history for List-BinarySearch
     - Developer's release.
     - Initial release to CPAN.
     - Unstable -- Seeking smoke test results.
+
+0.01_002    4-25-2010
+    - Developer's release.
+    - Fixed a coderef detection bug in bsearch_list().
+    - Completed 11-search.t tests.
+    - Many POD revisions.
+    - Many test suite revisions.
+    - List/BinarySearch.pm is now Perl::Critic level 2 compliant.
+    - Test suite is Perl::Critic level 4 compliant.
