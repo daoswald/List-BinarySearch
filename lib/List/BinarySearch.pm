@@ -23,12 +23,12 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.01_002
+Version 0.01_003
 Developer's Release
 
 =cut
 
-our $VERSION = '0.01_002';
+our $VERSION = '0.01_003';
 $VERSION = eval $VERSION;    ## no critic (eval,version)
 
 =head1 SYNOPSIS
