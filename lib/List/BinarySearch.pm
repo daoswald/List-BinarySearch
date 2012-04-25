@@ -1,3 +1,5 @@
+## no critic (RCS)
+
 package List::BinarySearch;
 
 use strict;
@@ -5,12 +7,15 @@ use warnings;
 
 use Scalar::Util qw( looks_like_number );
 
-
 require Exporter;
-our @ISA = qw( Exporter );
-our @EXPORT_OK = qw( bsearch_array bsearch_list );
-our %EXPORT_TAGS = ( all => [ qw( bsearch_array bsearch_list ) ] );
 
+# Perl::Critic advises to 'use base'.  The documentation for 'base' suggests
+# using 'parent'.  'parent' would exclude older Perls.  So we'll avoid the
+# issue by just using @ISA, as advised in the Exporter POD.
+
+our @ISA       = qw(Exporter);                       ## no critic (ISA)
+our @EXPORT_OK = qw( bsearch_array bsearch_list );
+our %EXPORT_TAGS = ( all => [qw( bsearch_array bsearch_list )] );
 
 =head1 NAME
 
@@ -24,17 +29,45 @@ Developer's Release
 =cut
 
 our $VERSION = '0.01_001';
-$VERSION = eval $VERSION; ## no critic (eval)
-
+$VERSION = eval $VERSION;    ## no critic (eval,version)
 
 =head1 SYNOPSIS
 
 This module performs a binary search on an array passed by reference, or on
 an array or list passed as a flat list.
 
-The binary search algorithm implemented in this module provides stable
-searches (deferred detection).  Stable binary search algorithms have the
-following characteristics, contrasted with their unstable binary search
+Examples:
+
+    use List::BinarySearch qw( bsearch_array bsearch_list );
+
+    my @array = ( 100, 200, 300, 400, 500 );
+    my $index;
+
+    # Search an array passed by reference.
+    $index = bsearch_array( \@array, $target );
+
+    # Search an array passed by reference, using a custom comparator.
+    $index = bsearch_array( \@array, $target, sub { $_[0] cmp $_[1] } );
+
+    # Search an array passed as a flat list.
+    $index = bsearch_list( $target, @array );
+
+    # Search an array passed as a flat list, using a custom comparator.
+    $index = bsearch_list( $sub{ $_[0] cmp $_[1] }, $target, @array );
+
+    # Returns undef:
+    $index = bsearch_array( \@array, 250 );  # 250 isn't found in @array.
+
+=head1 DESCRIPTION
+
+A binary search searches sorted lists using a divide and conquer technique.
+On each iteration the search domain is cut in half, until the result is found.
+The computational complexity of a binary search is O(log n).
+
+The binary search algorithm implemented in this module is known as a
+Deferred Detection variant on the traditional Binary Search.  Deferred
+Detection provides B<stable searches>.  Stable binary search algorithms have
+the following characteristics, contrasted with their unstable binary search
 cousins:
 
 =over 4
@@ -61,49 +94,42 @@ element in a range of non-unique keys.
 
 =back
 
-Examples:
+=head1 RATIONALE
 
-    use List::BinarySearch qw( bsearch_array bsearch_list );
+Quoting from L<Wikipedia|http://en.wikipedia.org/wiki/Binary_search_algorithm>:
+I<When Jon Bentley assigned it as a problem in a course for professional
+programmers, he found that an astounding ninety percent failed to code a
+binary search correctly after several hours of working on it, and another
+study shows that accurate code for it is only found in five out of twenty
+textbooks. Furthermore, Bentley's own implementation of binary search,
+published in his 1986 book Programming Pearls, contains an error that remained
+undetected for over twenty years.>
 
-    my @array = ( 100, 200, 300, 400, 500 );
-    my $index;
+So the answer to the question "Why use a module for this?" is "Because it's
+already written and tested, so that you won't have to write and test your own
+implementation.
 
-    # Search an array passed by reference.
-    $index = bsearch_array( \@array, $target );
+Nevertheless, before using this module the user should weigh the other
+options: linear searches ( C<grep> or C<List::Util::first> ), or hash based
+searches. A binary search only makes sense if the data set is already sorted
+in ascending order, and if it is determined that the cost of a linear search,
+or the linear-time conversion to a hash-based container is too inefficient.
+So often, it just doesn't make sense to try to optimize beyond what Perl's
+tools natively provide.
 
-    # Search an array passed by reference, using a custom comparator.
-    $index = bsearch_array( \@array, $target, sub { $_[0] cmp $_[1] } );
+However, in some cases, a binary search can be an excellent choice.  Finding
+the first matching element in a list of 1,000,000 items with a linear search
+would have a worst-case of 1,000,000 iterations, whereas the worst case for
+a binary search of 1,000,000 elements is about 20 iterations.  If many lookups
+will be performed on a list, the savings of O(log n) lookups may outweigh
+the cost of sorting.
 
-    # Search an array passed as a flat list.
-    $index = bsearch_list( $target, @array );
-
-    # Search an array passed as a flat list, using a custom comparator.
-    $index = bsearch_list( $sub{ $_[0] cmp $_[1] }, $target, @array );
-
-    # Returns undef:
-    $index = bsearch_array( \@array, 250 );  # 250 isn't found in @array.
-
+Profile, then benchmark, then consider the options, and finally, optimize.
 
 =head1 EXPORT
 
 Nothing is exported by default.  Upon request will export C<bsearch_array>,
 C<bsearch_list>, or both functions by specifying C<:all>.
-
-=head1 RATIONALE
-
-Before using this module the user should weigh the other options: linear
-searches ( C<grep> or C<List::Util::first> ), or hash based searches.
-A binary search only makes sense if the data set is already sorted in
-ascending order, and if it is determined that the cost of a linear search, or
-the linear-time conversion to a hash-based container is too inefficient.  So
-often, it just doesn't make sense to try to optimize beyond what Perl's tools
-natively provide.
-
-However, in some cases, a binary search can be an excellent choice.  Finding
-the first matching element in a list of 1,000,000 items with a linear search
-would have a worst-case of 1,000,000 iterations, whereas the worst case for
-a binary search of 1,000,000 elements is about 20 iterations.
-
 
 =head1 SUBROUTINES/METHODS
 
@@ -130,16 +156,17 @@ element is found, undef is returned.
 =cut
 
 sub bsearch_array {
-    my( $aref, $target, $code ) = @_;
-    $code //= looks_like_number( $target ) ?
-        sub { $_[0] <=> $_[1] }            :
-        sub { $_[0] cmp $_[1] };
+    my ( $aref, $target, $code ) = @_;
+    $code //=
+        looks_like_number($target)
+        ? sub { $_[0] <=> $_[1] }
+        : sub { $_[0] cmp $_[1] };
 
     my $min = 0;
     my $max = $#{$aref};
-    while( $max > $min ) {
+    while ( $max > $min ) {
         my $mid = int( ( $min + $max ) / 2 );
-        if( $code->( $target, $aref->[$mid] ) > 0 ) {
+        if ( $code->( $target, $aref->[$mid] ) > 0 ) {
             $min = $mid + 1;
         }
         else {
@@ -148,9 +175,8 @@ sub bsearch_array {
     }
     return $min
         if $max == $min && $code->( $target, $aref->[$min] ) == 0;
-    return;  # Undef in scalar context, empty list in list context.
+    return;    # Undef in scalar context, empty list in list context.
 }
-
 
 =head2 bsearch_list
 
@@ -174,15 +200,15 @@ element is found, undef is returned.
 
 =cut
 
+## no critic (unpack)
 sub bsearch_list {
     my $code;
-    if( ref $_[0] =~ /CODE/ ) {
-        $code = shift
+    if ( ref( $_[0] ) =~ /CODE/sm ) {
+        $code = shift;
     }
     my $target = shift;
     return bsearch_array( \@_, $target, $code );
 }
-
 
 =head2 \&comparator
 (callback)
@@ -214,6 +240,38 @@ comparison logic.  A custom comparator function should return:
     -1 if $target <  $list_item
      0 if $target == $list_item
      1 if $target >  $list_item
+
+The first parameter passed to the comparator will be the target.  The second
+parameter will be the contents of the element being tested.  This leads to
+an asymetry that might be prone to "gotchas" when writing custom comparators
+for searching complex data structures.  As an example, consider the following
+data structure:
+
+    my @structure = (
+        [ 100, 'ape'  ],
+        [ 200, 'frog' ],
+        [ 300, 'dog'  ],
+        [ 400, 'cat'  ]
+    );
+
+A numeric custom comparator for such a data structure would look like this:
+
+    sub{ $_[0] <=> $_[1][0]; }
+
+...or more explicitly...
+
+    sub{
+        my( $target, $list_item ) = @_;
+        return $target <=> $list_item->[0];
+    }
+
+Therefore, a call to C<bsearch_list> where the target is to solve for
+C<$unknown> such that C<$structure[$unknown][0] == 200> might look like this:
+
+    my $found_ix = bsearch_list( sub{ $_[0] <=> $_[1][0] }, 200, @structure );
+    print $structure[$found_ix][1], "\n" if defined $found_ix;
+    # prints 'frog'
+
 
 =cut
 
@@ -247,6 +305,23 @@ require a custom comparator.
 
 =back
 
+=head1 CONFIGURATION AND ENVIRONMENT
+
+This module should run under any Perl from 5.6.0 onward.  There are no special
+environment or configuration concerns to address.  In the future, an XS plugin
+will be implemented, and at that time there may be additional configuration
+details in this section.
+
+=head1 DEPENDENCIES
+
+This module uses L<Exporter|Exporter> and L<Scalar::Util|Scalar::Util>, both
+of which are core modules.  Installation requires L<Test::More|Test::More>,
+which is also a core module.
+
+=head1 INCOMPATIBILITIES
+
+This module hasn't been tested on Perl versions that predate Perl 5.6.0.
+
 =head1 AUTHOR
 
 David Oswald, C<< <davido at cpan.org> >>
@@ -254,7 +329,8 @@ David Oswald, C<< <davido at cpan.org> >>
 If the documentation fails to answer your question, or if you have a comment
 or suggestion, send me an email.
 
-=head1 BUGS
+=head1 DIAGNOSTICS
+=head1 BUGS AND LIMITATIONS
 
 This is an early developer's release.  The API can (and probably will) change.
 Version numbers in this format: C<x.xx_xxx> are dev releases.
@@ -302,6 +378,10 @@ L<http://search.cpan.org/dist/List-BinarySearch/>
 
 =head1 ACKNOWLEDGEMENTS
 
+I<Necessity, who is the mother of invention.> -- plato.
+
+I<Although the basic idea of binary search is comparatively straightforward,
+the details can be surprisingly tricky...>  -- Donald Knuth
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -316,4 +396,4 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
-1; # End of List::BinarySearch
+1;    # End of List::BinarySearch

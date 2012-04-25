@@ -7,10 +7,12 @@ use Test::More tests => 3;
 
 sub not_in_file_ok {
     my ($filename, %regex) = @_;
-    open( my $fh, '<', $filename )
-        or die "couldn't open $filename for reading: $!";
 
     my %violated;
+
+    ## no critic (RequireBriefOpen)
+    open  my $fh, '<', $filename
+        or die "couldn't open $filename for reading: $!";
 
     while (my $line = <$fh>) {
         while (my ($desc, $regex) = each %regex) {
@@ -19,6 +21,7 @@ sub not_in_file_ok {
             }
         }
     }
+    close $fh;
 
     if (%violated) {
         fail("$filename contains boilerplate text");
@@ -26,6 +29,7 @@ sub not_in_file_ok {
     } else {
         pass("$filename contains no boilerplate text");
     }
+    return;
 }
 
 sub module_boilerplate_ok {
@@ -35,6 +39,7 @@ sub module_boilerplate_ok {
         'boilerplate description'     => qr/Quick summary of what the module/,
         'stub function definition'    => qr/function[12]/,
     );
+    return;
 }
 
 not_in_file_ok(README =>

@@ -7,14 +7,15 @@ use Test::More;
 use English qw( -no_match_vars );
 
 
-# To enable this suite one must set the ILCPP_TEST_AUTHOR to a true value.
+# To enable this suite one must set the RELEASE_TESTING environment variable
+# to a true value.
 # This prevents author tests from running on a user install.
 # It's possible users would have their own conflicting Perl::Critic config,
 # so it would be a bad idea to let this test run on users systems.
 
 if ( not $ENV{RELEASE_TESTING} ) {
     my $msg =
-        'Author Test: Set $ENV{ILCPP_TEST_AUTHOR} to a true value to run.';
+        'Author Test: Set $ENV{RELEASE_TESTING} to a true value to run.';
     plan( skip_all => $msg );
 }
 
@@ -28,11 +29,12 @@ if ( $EVAL_ERROR ) {
     plan( skip_all => $msg );
 }
 
+# Set a higher severity level.  Note: List/BinarySearch.pm meets level 2.
+Test::Perl::Critic->import( -severity => 4 );
+
 # We want to test the primary module components (blib/) as well as the
-# test suite (t/ and grammar/t/).
-my @directories = qw{
-    blib/      t/
-};
+# test suite (t/).
+my @directories = qw{  blib/  t/  };
 
 
 Test::Perl::Critic::all_critic_ok( @directories );
