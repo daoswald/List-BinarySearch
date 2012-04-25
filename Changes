@@ -13,3 +13,7 @@ Revision history for List-BinarySearch
     - Many test suite revisions.
     - List/BinarySearch.pm is now Perl::Critic level 2 compliant.
     - Test suite is Perl::Critic level 4 compliant.
+
+0.01_003    ----------
+    - Removed //= from bsearch_array() to reestablish backward compatibility
+      with Perl 5.8.0 and older.

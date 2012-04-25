@@ -157,10 +157,13 @@ element is found, undef is returned.
 
 sub bsearch_array {
     my ( $aref, $target, $code ) = @_;
-    $code //=
-        looks_like_number($target)
-        ? sub { $_[0] <=> $_[1] }
-        : sub { $_[0] cmp $_[1] };
+
+    if( ! defined( $code ) ) {
+        $code =
+            looks_like_number($target)
+            ? sub { $_[0] <=> $_[1] }
+            : sub { $_[0] cmp $_[1] };
+    }
 
     my $min = 0;
     my $max = $#{$aref};
