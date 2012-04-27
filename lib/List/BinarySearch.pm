@@ -214,29 +214,28 @@ element equalling C<$target>.  If no element is found, undef is returned.
 
 sub bsearch_transform_arrayref {
     my ( $aref, $target, $transform_code ) = @_;
-    if (   !defined $transform_code
-        || !reftype($transform_code) eq 'CODE' )
-    {
-        $transform_code = sub { $_[0] };
-    }
-    my $comparator
-        = looks_like_number $target
-        ? sub { $_[0] <=> $transform_code->( $_[1] ) }
-        : sub { $_[0] cmp $transform_code->( $_[1] ) };
-
-    my $min = 0;
-    my $max = $#{$aref};
+    my $target_is_numeric = looks_like_number $target;
+    defined $transform_code or $transform_code = sub { $_[0] };
+    my ( $min, $max ) = ( 0, $#{$aref} );
     while ( $max > $min ) {
         my $mid = int( ( $min + $max ) / 2 );
-        if ( $comparator->( $target, $aref->[$mid] ) > 0 ) {
+        if (
+            $target_is_numeric
+            ? ( $target >  $transform_code->( $aref->[$mid] ) )
+            : ( $target gt $transform_code->( $aref->[$mid] ) )
+        ) {
             $min = $mid + 1;
         }
         else {
             $max = $mid;
         }
     }
+    my $found
+        = $target_is_numeric
+        ? ( $target == $transform_code->( $aref->[$min] ) )
+        : ( $target eq $transform_code->( $aref->[$min] ) );
     return $min
-        if $max == $min && $comparator->( $target, $aref->[$min] ) == 0;
+        if $max == $min && $found;
     return;    # Undef in scalar context, empty list in list context.
 }
 
