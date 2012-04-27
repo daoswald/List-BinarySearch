@@ -5,7 +5,7 @@ package List::BinarySearch;
 use strict;
 use warnings;
 
-use Scalar::Util qw( looks_like_number );
+use Scalar::Util qw( looks_like_number  reftype );
 
 require Exporter;
 
@@ -13,9 +13,11 @@ require Exporter;
 # using 'parent'.  'parent' would exclude older Perls.  So we'll avoid the
 # issue by just using @ISA, as advised in the Exporter POD.
 
-our @ISA       = qw(Exporter);                       ## no critic (ISA)
-our @EXPORT_OK = qw( bsearch_array bsearch_list );
-our %EXPORT_TAGS = ( all => [qw( bsearch_array bsearch_list )] );
+our @ISA = qw(Exporter);    ## no critic (ISA)
+our @EXPORT_OK
+    = qw( bsearch_arrayref bsearch_list bsearch_transform_arrayref );
+our %EXPORT_TAGS = (
+    all => [qw( bsearch_arrayref bsearch_list bsearch_transform_arrayref )] );
 
 =head1 NAME
 
@@ -38,25 +40,27 @@ an array or list passed as a flat list.
 
 Examples:
 
-    use List::BinarySearch qw( bsearch_array bsearch_list );
+    use List::BinarySearch qw( bsearch_arrayref bsearch_list );
 
     my @array = ( 100, 200, 300, 400, 500 );
     my $index;
 
     # Search an array passed by reference.
-    $index = bsearch_array( \@array, $target );
+    $index = bsearch_arrayref( \@array, $target );
 
     # Search an array passed by reference, using a custom comparator.
-    $index = bsearch_array( \@array, $target, sub { $_[0] cmp $_[1] } );
+    $index = bsearch_arrayref( \@array, $target, sub { $_[0] cmp $_[1] } );
 
-    # Search an array passed as a flat list.
+    # Search a flat list.
     $index = bsearch_list( $target, @array );
 
-    # Search an array passed as a flat list, using a custom comparator.
+    # Search a flat list, using a custom comparator.
     $index = bsearch_list( $sub{ $_[0] cmp $_[1] }, $target, @array );
 
     # Returns undef:
-    $index = bsearch_array( \@array, 250 );  # 250 isn't found in @array.
+    $index = bsearch_arrayref( \@array, 250 );  # 250 isn't found in @array.
+    $index = bsearch_list( 1000, @array );      # 1000 isn't found in @array.
+
 
 =head1 DESCRIPTION
 
@@ -96,8 +100,9 @@ element in a range of non-unique keys.
 
 =head1 RATIONALE
 
-Quoting from L<Wikipedia|http://en.wikipedia.org/wiki/Binary_search_algorithm>:
-I<When Jon Bentley assigned it as a problem in a course for professional
+Quoting from
+L<Wikipedia|http://en.wikipedia.org/wiki/Binary_search_algorithm>:  I<When Jon
+Bentley assigned it as a problem in a course for professional
 programmers, he found that an astounding ninety percent failed to code a
 binary search correctly after several hours of working on it, and another
 study shows that accurate code for it is only found in five out of twenty
@@ -128,15 +133,15 @@ Profile, then benchmark, then consider the options, and finally, optimize.
 
 =head1 EXPORT
 
-Nothing is exported by default.  Upon request will export C<bsearch_array>,
+Nothing is exported by default.  Upon request will export C<bsearch_arrayref>,
 C<bsearch_list>, or both functions by specifying C<:all>.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 bsearch_array
+=head2 bsearch_arrayref
 
-    $first_found_ix = bsearch_array( $array_ref, $target );
-    $first_found_ix = bsearch_array( $array_ref, $target, \&comparator );
+    $first_found_ix = bsearch_arrayref( $array_ref, $target );
+    $first_found_ix = bsearch_arrayref( $array_ref, $target, \&comparator );
 
 Pass a reference to an array to be searched, a target item to find, and
 optionally a reference to a comparator subroutine.
@@ -155,12 +160,12 @@ element is found, undef is returned.
 
 =cut
 
-sub bsearch_array {
+sub bsearch_arrayref {
     my ( $aref, $target, $code ) = @_;
 
-    if( ! defined( $code ) ) {
-        $code =
-            looks_like_number($target)
+    if ( !defined $code ) {
+        $code
+            = looks_like_number($target)
             ? sub { $_[0] <=> $_[1] }
             : sub { $_[0] cmp $_[1] };
     }
@@ -178,6 +183,60 @@ sub bsearch_array {
     }
     return $min
         if $max == $min && $code->( $target, $aref->[$min] ) == 0;
+    return;    # Undef in scalar context, empty list in list context.
+}
+
+=head2 bsearch_transform_arrayref
+
+    $first_found_ix = bsearch_transform_arrayref( $aref, $target );
+    $first_found_ix = bsearch_transform_arrayref( $aref, $target, \&transformer );
+
+Pass an array reference, a search target, and an optional data-transform
+subref.
+
+This algorithm detects whether C<$target> looks like a number or a string.  If
+it looks like a number, numeric comparisons are performed.  Otherwise,
+stringwise comparisons are used.  The optional transform coderef is
+used to transform each element of the search array to a value that can be
+compared against the target.  This is useful if C<$aref> points to a complex
+data structure.
+
+If no transform subroutine reference is provided, an identity sub is
+automatically generated.  It looks like this:
+
+    sub { $_[0] }
+
+
+The return value for C<bsearch_transform_arrayref()> is the index of the first
+element equalling C<$target>.  If no element is found, undef is returned.
+
+=cut
+
+sub bsearch_transform_arrayref {
+    my ( $aref, $target, $transform_code ) = @_;
+    if (   !defined $transform_code
+        || !reftype($transform_code) eq 'CODE' )
+    {
+        $transform_code = sub { $_[0] };
+    }
+    my $comparator
+        = looks_like_number $target
+        ? sub { $_[0] <=> $transform_code->( $_[1] ) }
+        : sub { $_[0] cmp $transform_code->( $_[1] ) };
+
+    my $min = 0;
+    my $max = $#{$aref};
+    while ( $max > $min ) {
+        my $mid = int( ( $min + $max ) / 2 );
+        if ( $comparator->( $target, $aref->[$mid] ) > 0 ) {
+            $min = $mid + 1;
+        }
+        else {
+            $max = $mid;
+        }
+    }
+    return $min
+        if $max == $min && $comparator->( $target, $aref->[$min] ) == 0;
     return;    # Undef in scalar context, empty list in list context.
 }
 
@@ -205,16 +264,42 @@ element is found, undef is returned.
 
 ## no critic (unpack)
 sub bsearch_list {
-    my $code;
-    if ( ref( $_[0] ) =~ /CODE/sm ) {
-        $code = shift;
+    my ( $code, $target );
+
+    if ( defined reftype $_[0] and reftype $_[0] eq 'CODE' ) {
+        $code   = shift;
+        $target = shift;
     }
-    my $target = shift;
-    return bsearch_array( \@_, $target, $code );
+    else {
+        $code
+            = looks_like_number( $target = shift )
+            ? sub { $_[0] <=> $_[1] }
+            : sub { $_[0] cmp $_[1] };
+    }
+
+    my $min = 0;
+    my $max = $#_;
+
+    while ( $max > $min ) {
+        my $mid = int( ( $min + $max ) / 2 );
+        if ( $code->( $target, $_[$mid] ) > 0 ) {
+            $min = $mid + 1;
+        }
+        else {
+            $max = $mid;
+        }
+    }
+
+    return $min
+        if $max == $min && $code->( $target, $_[$min] ) == 0;
+
+    return;    # Undef in scalar context, empty list in list context.
 }
+## use critic (unpack)
 
 =head2 \&comparator
-(callback)
+
+B<(callback)>
 
 Comparators are references to functions that accept as parameters a target,
 and a list element, returning the result of the relational comparison of the
@@ -275,6 +360,45 @@ C<$unknown> such that C<$structure[$unknown][0] == 200> might look like this:
     print $structure[$found_ix][1], "\n" if defined $found_ix;
     # prints 'frog'
 
+
+=cut
+
+=head2 \&TRANSFORMER
+
+B<(callback)>
+
+The transformer callback routine is used by C<bsearch_transform_arrayref()>
+to transform a given search list element into something that can be compared
+against C<$target>.  As an example, consider the following complex data
+structure:
+
+    my @structure = (
+        [ 100, 'ape'  ],
+        [ 200, 'frog' ],
+        [ 300, 'dog'  ],
+        [ 400, 'cat'  ]
+    );
+
+If the goal is do a numeric search using the first element of each
+integer/string pair, the transform sub might be written like this:
+
+    sub transformer {
+        return $_[0][0];    # Returns 100, 200, 300, etc.
+    }
+
+Or if the goal is instead to search by the second element of each int/str
+pair, the sub would instead look like this:
+
+    sub transformer {
+        return $_[0][1];
+    }
+
+A transformer sub that results in each list element being compared as-is
+against the target would be:
+
+    sub transformer {
+        $_[0];
+    }
 
 =cut
 
