@@ -25,12 +25,12 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.01_003
+Version 0.01_004
 Developer's Release
 
 =cut
 
-our $VERSION = '0.01_003';
+our $VERSION = '0.01_004';
 $VERSION = eval $VERSION;    ## no critic (eval,version)
 
 =head1 SYNOPSIS
@@ -276,8 +276,7 @@ sub bsearch_list {
             : sub { $_[0] cmp $_[1] };
     }
 
-    my $min = 0;
-    my $max = $#_;
+    my( $min, $max ) = ( 0, $#_ );
 
     while ( $max > $min ) {
         my $mid = int( ( $min + $max ) / 2 );

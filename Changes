@@ -1,11 +1,13 @@
 Revision history for List-BinarySearch
 
-0.01_001    4-23-2010
+0.01_001    4-23-2012
+    - Beta testing.  API may change.
     - Developer's release.
     - Initial release to CPAN.
     - Unstable -- Seeking smoke test results.
 
-0.01_002    4-25-2010 01:00am PDT
+0.01_002    4-25-2012 01:00am PDT
+    - Beta testing. API may change.
     - Developer's release.
     - Fixed a coderef detection bug in bsearch_list().
     - Completed 11-search.t tests.
@@ -14,6 +16,14 @@ Revision history for List-BinarySearch
     - List/BinarySearch.pm is now Perl::Critic level 2 compliant.
     - Test suite is Perl::Critic level 4 compliant.
 
-0.01_003    4-25-2010 09:40am PDT
+0.01_003    4-25-2012 09:40am PDT
+    - Beta testing.  API may change.
     - Removed //= from bsearch_array() to reestablish backward compatibility
       with Perl 5.8.0 and older.
+
+0.01_004    4-27-2012 01:23am PDT
+    - Beta testing.  API may change.
+    - Broke compatibility with older versions:
+        - Changed bsearch_array() to bsearch_arrayref()
+    - Added bsearch_transform_arrayref(), and supporting POD and tests.
+    - Added a few more tests to 11-search.t.
