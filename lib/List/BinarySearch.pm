@@ -19,18 +19,28 @@ our @EXPORT_OK
 our %EXPORT_TAGS = (
     all => [qw( bsearch_arrayref bsearch_list bsearch_transform_arrayref )] );
 
+# Perl::Critic also complains if we don't unpack our parameter lists at the
+# beginning of our subs.  Our subs detect whether the first arg is a
+# code-ref or a target, so unpacking first leads to more complex code.
+## no critic (unpack)
+
 =head1 NAME
 
 List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.01_004
-Developer's Release
+Version 0.01_005
+
+Developer's Release.
+
+There have been some API changes: order of parameters for C<bsearch_arrayref>,
+and C<bsearch_transform_arrayref>.  See the C<Changes> file for additional
+details.
 
 =cut
 
-our $VERSION = '0.01_004';
+our $VERSION = '0.01_005';
 $VERSION = eval $VERSION;    ## no critic (eval,version)
 
 =head1 SYNOPSIS
@@ -46,10 +56,17 @@ Examples:
     my $index;
 
     # Search an array passed by reference.
-    $index = bsearch_arrayref( \@array, $target );
+    $index = bsearch_arrayref( $target, \@array );
 
     # Search an array passed by reference, using a custom comparator.
-    $index = bsearch_arrayref( \@array, $target, sub { $_[0] cmp $_[1] } );
+    $index = bsearch_arrayref( sub{ $_[0] cmp $_[1] }, $target, \@array );
+
+    # Search an array passed by reference, using a custom transform routine.
+    $index = bsearch_transform_arrayref( sub{ $_[0] }, $target, \@array );
+
+    # The transform routine is optional.  If omitted, behavior is identical
+    # to bsearch_arrayref():
+    $index = bsearch_transform_arrayref( $target, \@array );
 
     # Search a flat list.
     $index = bsearch_list( $target, @array );
@@ -58,8 +75,9 @@ Examples:
     $index = bsearch_list( $sub{ $_[0] cmp $_[1] }, $target, @array );
 
     # Returns undef:
-    $index = bsearch_arrayref( \@array, 250 );  # 250 isn't found in @array.
-    $index = bsearch_list( 1000, @array );      # 1000 isn't found in @array.
+    $index = bsearch_arrayref( 250, \@array );  # undef: 250 isn't in @array.
+    $index = bsearch_arrayref( 42, \@array );   # undef: 42 isn't in @array.
+    $index = bsearch_list( 1000, @array );      # undef: 1000 isn't in @array.
 
 
 =head1 DESCRIPTION
@@ -84,9 +102,9 @@ would return the first one found, which may not be the chronological first.
 searches may find the target in fewer iterations in the best case, but in the
 worst case would still be O(log n).
 
-=item * Stable binary searches only require one relational comparison per
-iteration, where unstable binary searches require two conditionals per
-iteration.
+=item * Stable binary searches only require one relational comparison of a
+given pair of data elements per iteration, where unstable binary searches
+require two comparisons per iteration.
 
 =item * The net result is that although an unstable binary search might have
 a better "best case" time complexity, the fact that a stable binary search
@@ -110,26 +128,28 @@ textbooks. Furthermore, Bentley's own implementation of binary search,
 published in his 1986 book Programming Pearls, contains an error that remained
 undetected for over twenty years.>
 
-So the answer to the question "Why use a module for this?" is "Because it's
-already written and tested, so that you won't have to write and test your own
-implementation.
+So the answer to the question "Why use a module for this?" is "Because it has
+already been written and tested.  You don't have to write, test, and debug
+your own implementation.
 
 Nevertheless, before using this module the user should weigh the other
 options: linear searches ( C<grep> or C<List::Util::first> ), or hash based
 searches. A binary search only makes sense if the data set is already sorted
 in ascending order, and if it is determined that the cost of a linear search,
-or the linear-time conversion to a hash-based container is too inefficient.
-So often, it just doesn't make sense to try to optimize beyond what Perl's
-tools natively provide.
+or the linear-time conversion to a hash-based container is too inefficient or
+demands too much memory.  So often, it just doesn't make sense to try to
+optimize beyond what Perl's tools natively provide.
 
-However, in some cases, a binary search can be an excellent choice.  Finding
-the first matching element in a list of 1,000,000 items with a linear search
-would have a worst-case of 1,000,000 iterations, whereas the worst case for
-a binary search of 1,000,000 elements is about 20 iterations.  If many lookups
-will be performed on a list, the savings of O(log n) lookups may outweigh
-the cost of sorting.
+However, there are cases where, a binary search may be an excellent choice.
+Finding the first matching element in a list of 1,000,000 items with a linear
+search would have a worst-case of 1,000,000 iterations, whereas the worst case
+for a binary search of 1,000,000 elements is about 20 iterations.  In fact, if
+many lookups will be performed on a seldom-changed list, the savings of
+O(log n) lookups may outweigh the cost of sorting or performing occasional
+ordered inserts.
 
-Profile, then benchmark, then consider the options, and finally, optimize.
+Profile, then benchmark, then consider (and benchmark) the options, and
+finally, optimize.
 
 =head1 EXPORT
 
@@ -140,11 +160,11 @@ C<bsearch_list>, or both functions by specifying C<:all>.
 
 =head2 bsearch_arrayref
 
-    $first_found_ix = bsearch_arrayref( $array_ref, $target );
-    $first_found_ix = bsearch_arrayref( $array_ref, $target, \&comparator );
+    $first_found_ix = bsearch_arrayref( $target, $array_ref );
+    $first_found_ix = bsearch_arrayref( \&comparator, $target, $array_ref );
 
-Pass a reference to an array to be searched, a target item to find, and
-optionally a reference to a comparator subroutine.
+Pass an optional reference to a comparator subroutine, a target item to find,
+and a reference to an array to be searched.
 
 If no comparator is passed, the search algorithm will try to determine if
 C<$target> looks like a number or like a string.  If C<$target> looks like a
@@ -161,13 +181,17 @@ element is found, undef is returned.
 =cut
 
 sub bsearch_arrayref {
-    my ( $aref, $target, $code ) = @_;
 
-    if ( !defined $code ) {
-        $code
-            = looks_like_number($target)
-            ? sub { $_[0] <=> $_[1] }
-            : sub { $_[0] cmp $_[1] };
+    my( $code, $target, $aref );
+
+    if ( defined reftype $_[0] and reftype $_[0] eq 'CODE' ) {
+        ( $code, $target, $aref ) = @_;
+    }
+    else {
+        ( $target, $aref ) = @_;
+          $code = looks_like_number $target
+            ? \&_numeric_compare
+            : \&_stringwise_compare;
     }
 
     my $min = 0;
@@ -213,10 +237,20 @@ element equalling C<$target>.  If no element is found, undef is returned.
 =cut
 
 sub bsearch_transform_arrayref {
-    my ( $aref, $target, $transform_code ) = @_;
+
+    my( $transform_code, $target, $aref );
+
+    if( defined reftype $_[0] and reftype $_[0] eq 'CODE' ) {
+        ( $transform_code, $target, $aref ) = @_;
+    }
+    else {
+        ( $target, $aref ) = @_;
+        $transform_code = \&_identity_transform;
+    }
+
     my $target_is_numeric = looks_like_number $target;
-    defined $transform_code or $transform_code = sub { $_[0] };
     my ( $min, $max ) = ( 0, $#{$aref} );
+
     while ( $max > $min ) {
         my $mid = int( ( $min + $max ) / 2 );
         if (
@@ -261,7 +295,6 @@ element is found, undef is returned.
 
 =cut
 
-## no critic (unpack)
 sub bsearch_list {
     my ( $code, $target );
 
@@ -272,8 +305,8 @@ sub bsearch_list {
     else {
         $code
             = looks_like_number( $target = shift )
-            ? sub { $_[0] <=> $_[1] }
-            : sub { $_[0] cmp $_[1] };
+            ? \&_numeric_compare
+            : \&_stringwise_compare;
     }
 
     my( $min, $max ) = ( 0, $#_ );
@@ -293,7 +326,6 @@ sub bsearch_list {
 
     return;    # Undef in scalar context, empty list in list context.
 }
-## use critic (unpack)
 
 =head2 \&comparator
 
@@ -361,7 +393,11 @@ C<$unknown> such that C<$structure[$unknown][0] == 200> might look like this:
 
 =cut
 
-=head2 \&TRANSFORMER
+# Used by bsearch_list(), and bsearch_arrayref().
+sub _stringwise_compare { return $_[0] cmp $_[1]; }
+sub _numeric_compare    { return $_[0] <=> $_[1]; }
+
+=head2 \&transformer
 
 B<(callback)>
 
@@ -399,6 +435,9 @@ against the target would be:
     }
 
 =cut
+
+# Used by bsearch_transform_arrayref()
+sub _identity_transform { return $_[0];           }
 
 =head1 DATA SET REQUIREMENTS
 
@@ -455,6 +494,8 @@ If the documentation fails to answer your question, or if you have a comment
 or suggestion, send me an email.
 
 =head1 DIAGNOSTICS
+
+
 =head1 BUGS AND LIMITATIONS
 
 This is an early developer's release.  The API can (and probably will) change.
@@ -520,5 +561,6 @@ See http://dev.perl.org/licenses/ for more information.
 
 
 =cut
+
 
 1;    # End of List::BinarySearch
