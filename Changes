@@ -1,7 +1,29 @@
 Revision history for List-BinarySearch
 
+
+0.02        4-30-2012 01:21am PDT
+    - STATUS:
+        - Stable release.  API may only break compatibility after a
+          deprecation cycle.
+    - API CHANGES:
+        - bsearch_arrayref gets prototypes and becomes bsearch_str,
+          and bsearch_num.
+        - bsearch_transform_arrayref becomes bsearch_transform.
+        - bsearch_custom is born.
+        - bsearch_list is gone.
+        - All functions now have prototypes to gain the familiar
+          user-interface of List::Util and List::MoreUtils.
+    - BUG FIXES:
+        - A few POD typos fixed.
+    - USER ENHANCEMENTS:
+        - See API CHANGES.
+        - Many POD changes to clarify text and simplify examples.
+    - ADDITIONAL CODE ENHANCEMENTS:
+        - Several logic paths were unrolled to eliminate costly subroutine
+          calls inside of tight loops.
+
 0.01_005    4-28-2012 10:43pm PDT
-    - STATUS
+    - STATUS:
         - Beta testing.  API may change.
         - Developer's release.
         - Breaks compatibility with previous API.
