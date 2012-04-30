@@ -1,22 +1,41 @@
----
-abstract: Binary Search a sorted list or array.
-author:
-  - 'David Oswald <davido@cpan.org>'
-build_requires:
-  Test::More: 0.98
-configure_requires:
-  ExtUtils::MakeMaker: 0
-dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.120921'
-license: perl
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
-name: List-BinarySearch
-no_index:
-  directory:
-    - t
-    - inc
-requires:
-  Scalar::Util: 0
-version: 0.03
+{
+   "abstract" : "Binary Search a sorted list or array.",
+   "author" : [
+      "David Oswald <davido@cpan.org>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.113640",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "List-BinarySearch",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Test::More" : "0.98"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : 0
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Scalar::Util" : 0
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "0.04"
+}

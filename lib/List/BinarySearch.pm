@@ -32,13 +32,13 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 Stable release.
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
 
@@ -49,34 +49,44 @@ an array or list passed as a flat list.
 
 Examples:
 
+
     use List::BinarySearch qw( :all );
     use List::BinarySearch qw(
         bsearch_str         bsearch_num         bsearch_general
         bsearch_custom      bsearch_transform
     );
 
+
     my @num_array =   ( 100, 200, 300, 400, 500 );
     my $index;
 
+
     # Find the first index of element containing the number 300.
+
     $index = bsearch_num       300, @num_array;
     $index = bsearch_general   300, @num_array;
     $index = bsearch_custom    { $_[0] <=> $_[1] } 300, @num_array;
     $index = bsearch_transform { $_[0]           } 300, @num_array;
 
-    my @str_array = qw( Brahms Beethoven Schubert Mozart Bach );
+
+    my @str_array = qw( Bach Beethoven Brahms Mozart Schubert );
 
     # Find the first index of element containing the string 'Mozart'.
+
     $index = bsearch_str       'Mozart', @str_array;
     $index = bsearch_general   'Mozart', @str_array;
     $index = bsearch_custom    { $_[0] cmp $_[1] } 'Mozart', @str_array;
     $index = bsearch_transform { $_[0]           } 'Mozart', @str_array;
 
+
     # All functions return 'undef' if nothing is found:
+
     $index = bsearch_str 'Meatloaf', @str_array;    # not found: returns undef
     $index = bsearch_num 42,         @num_array;    # not found: returns undef
 
+
     # Complex data structures:
+
     my @complex = (
         [ 'one',   1 ],
         [ 'two',   2 ],
@@ -85,13 +95,16 @@ Examples:
         [ 'five' , 5 ],
     );
 
+
     # Find 'one' from the structure above:
-    $index = bsearch_custom { $_[0] cmp $_[1][0] } 'one', @complex;
-    $index = besarch_custom { $_[1][0]           } 'one', @complex;
+
+    $index = bsearch_custom    { $_[0] cmp $_[1][0] } 'one', @complex;
+    $index = besarch_transform { $_[1][0]           } 'one', @complex;
+
 
 =head1 DESCRIPTION
 
-A binary search searches sorted lists using a divide and conquer technique.
+A binary search searches B<sorted> lists using a divide and conquer technique.
 On each iteration the search domain is cut in half, until the result is found.
 The computational complexity of a binary search is O(log n).
 
@@ -168,13 +181,13 @@ C<bsearch_transform>, or all functions by specifying C<:all>.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 bsearch_str STRING_TARGET ARRAY
+=head2 bsearch_str STRING_NEEDLE ARRAY_HAYSTACK
 
-    $first_found_ix = bsearch_str $target, $array_ref;
+    $first_found_ix = bsearch_str $needle, @haystack;
 
-Finds the string specified by C<$target> in the array C<@array>.  Return value
-is an index to the first (lowest numbered) matching element in
-C<@array>, or C<undef> if nothing is found.  String comparisons are used.
+Finds the string specified by C<$needle> in the array C<@haystack>.  Return
+value is an index to the first (lowest numbered) matching element in
+C<@haystack>, or C<undef> if nothing is found.  String comparisons are used.
 The target must be an exact and complete match.
 
 =cut
@@ -198,13 +211,13 @@ sub bsearch_str ($\@) {
     return;    # Undef in scalar context, empty list in list context.
 }
 
-=head2 bsearch_num NUMERIC_TARGET ARRAY
+=head2 bsearch_num NUMERIC_NEEDLE ARRAY_HAYSTACK
 
-    $first_found_ix = bsearch $target, $array_ref;
+    $first_found_ix = bsearch $needle, @haystack;
 
-Finds the numeric needle C<$target> in the haystack C<@array>.  Return value
-is an index to the first (lowest numbered) matching element in C<@array>, or
-C<undef> if C<$target> isn't found.
+Finds the numeric needle C<$needle> in the haystack C<@haystack>.  Return
+value is an index to the first (lowest numbered) matching element in
+C<@haystack>, or C<undef> if C<$needle> isn't found.
 
 The comparison type is numeric.
 
@@ -229,19 +242,19 @@ sub bsearch_num ($\@) {
     return;    # Undef in scalar context, empty list in list context.
 }
 
-=head2 bsearch_general TARGET ARRAY
+=head2 bsearch_general NEEDLE ARRAY_HAYSTACK
 
-    $first_found_ix = bsearch_general $target, @array;
+    $first_found_ix = bsearch_general $needle, @haystack;
 
-Detects whether C<$target> is a string or number, and performs the
-appropriate comparisons to find C<$target> in the haystack C<@array>.  Return
+Detects whether C<$needle> is a string or number, and performs the
+appropriate comparisons to find C<$needle> in C<@haystack>.  Return
 value is an index to the first (lowest numbered) matching element in
-C<@array>.
+C<@haystack>.
 
 The comparison type is automatically detected for numbers or strings.  This
 extra magic is a convenience that does incur a small performance penalty.
 
-If C<$target> isn't found, the return value will be C<undef>.
+If C<$haystack> isn't found, the return value will be C<undef>.
 
 =cut
 
@@ -278,16 +291,16 @@ sub bsearch_general ($\@) {
     return;    # Undef in scalar context, empty list in list context.
 }
 
-=head2 bsearch_custom CODE TARGET ARRAY
+=head2 bsearch_custom CODE NEEDLE ARRAY_HAYSTACK
 
-    $first_found_ix = bsearch_custom { $_[0] cmp $_[1] } $target, @array;
-    $first_found_ix = bsearch_custom \&comparator,       $target, @array;
+    $first_found_ix = bsearch_custom { $_[0] cmp $_[1] } $needle, @haystack;
+    $first_found_ix = bsearch_custom \&comparator,       $needle, @haystack;
 
 Pass a code block or subref, a search target, and an array to search.  Uses
-the subroutine suppled in the code block or subref callback to test C<target>
-against elements in C<@array>.
+the subroutine suppled in the code block or subref callback to test C<$needle>
+against elements in C<@haystack>.
 
-Return value is the index of the first element equalling C<$target>.  If no
+Return value is the index of the first element equalling C<$needle>.  If no
 element is found, undef is returned.
 
 Beware a potential 'I<gotcha>': When dealing with complex data structures, the
@@ -319,21 +332,21 @@ sub bsearch_custom (&$\@) {
     return;    # Undef in scalar context, empty list in list context.
 }
 
-=head2 bsearch_transform CODE TARGET ARRAY
+=head2 bsearch_transform CODE NEEDLE ARRAY_HAYSTACK
 
-    $first_found_ix = bsearch_transform { $_[0] }      $target, @array;
-    $first_found_ix = bsearch_transform \&transformer, $target, @array );
+    $first_found_ix = bsearch_transform { $_[0] }    $needle, @haystack;
+    $first_found_ix = bsearch_transform \&transform, $needle, @haystack );
 
-Pass a transform code block or subref, a target to find, and an array to find
-it in.  Return value is the lowest numbered index to an element matching
-C<$target>, or C<undef> if nothing is found.
+Pass a transform code block or subref, a needle to find, and a haystack to
+find it in.  Return value is the lowest numbered index to an element matching
+C<$needle>, or C<undef> if nothing is found.
 
-This algorithm detects whether C<$target> looks like a number or a string.  If
+This algorithm detects whether C<$needle> looks like a number or a string.  If
 it looks like a number, numeric comparisons are performed.  Otherwise,
 stringwise comparisons are used.  The transform code block or coderef is
 used to transform each element of the search array to a value that can be
-compared against the target.  This is useful if C<@array> contains a complex
-data structure, and less prone to user error in such cases than
+compared against the target.  This is useful if C<@haystack> contains a
+complex data structure, and less prone to user error in such cases than
 C<bsearch_custom>.
 
 If no transformation is needed, use C<bsearch_str>, C<bsearch_num>, or
@@ -391,14 +404,14 @@ Basic comparators might be defined like this:
 
     # Numeric comparisons:
     $comp = sub {
-        my( $target, $list_item ) = @_;
-        return $target <=> $list_item;
+        my( $needle, $haystack_item ) = @_;
+        return $needle <=> $haystack_item;
     };
 
     # Non-numeric (stringwise) comparisons:
     $comp = sub {
-        my( $target, $list_item ) = @_;
-        return $target cmp $list_item;
+        my( $needle, $haystack_item ) = @_;
+        return $needle cmp $haystack_item;
     };
 
 The first parameter passed to the comparator will be the target.  The second
@@ -409,9 +422,9 @@ data structure:
 
     my @structure = (
         [ 100, 'ape'  ],
-        [ 200, 'frog' ],
+        [ 200, 'cat' ],
         [ 300, 'dog'  ],
-        [ 400, 'cat'  ]
+        [ 400, 'frog'  ]
     );
 
 A numeric custom comparator for such a data structure would look like this:
@@ -421,16 +434,17 @@ A numeric custom comparator for such a data structure would look like this:
 ...or more explicitly...
 
     sub{
-        my( $target, $list_item ) = @_;
-        return $target <=> $list_item->[0];
+        my( $needle, $haystack_item ) = @_;
+        return $needle <=> $haystack_item->[0];
     }
 
-Therefore, a call to C<bsearch_custom> where the target is to solve for
-C<$unknown> such that C<$structure[$unknown][0] == 200> might look like this:
+Therefore, a call to C<bsearch_custom> where the target (or needle) is to
+solve for C<$found_ix> such that C<$structure[$found_ix][0] == 200> might look
+like this:
 
     my $found_ix = bsearch_custom { $_[0] <=> $_[1][0] }, 200, @structure;
     print $structure[$found_ix][1], "\n" if defined $found_ix;
-    # prints 'frog'
+    # prints 'cat'
 
 
 =head2 \&transform
@@ -439,14 +453,14 @@ B<(callback)>
 
 The transform callback routine is used by C<bsearch_transform()>
 to transform a given search list element into something that can be compared
-against C<$target>.  As an example, consider the following complex data
+against C<$needle>.  As an example, consider the following complex data
 structure:
 
     my @structure = (
         [ 100, 'ape'  ],
-        [ 200, 'frog' ],
+        [ 200, 'cat' ],
         [ 300, 'dog'  ],
-        [ 400, 'cat'  ]
+        [ 400, 'frog'  ]
     );
 
 If the goal is do a numeric search using the first element of each
@@ -478,7 +492,7 @@ are:
 
 =over 4
 
-=item * The lists must be in ascending sorted order.
+=item * B<The lists must be in ascending sorted order>.
 
 This is a big one.  Keep in mind that the best sort routines run in O(n log n)
 time.  It makes no sense to sort a list in O(n log n), and then perform a
@@ -486,8 +500,8 @@ single O(log n) binary search when List::Util C<first> could accomplish the
 same thing in O(n) time.  A Binary Search only makes sense if there are other
 good reasons for keeping the data set sorted in the first place.
 
-=item * Passing an unsorted list to these Binary Search algorithms will result
-in undefined behavior.
+B<Passing an unsorted list to these Binary Search algorithms will result in
+undefined behavior.  There is validity checking.>
 
 A Binary Search consumes O(log n) time.  It would, therefore, be foolish for
 these algorithms to pre-check the list for sortedness, as that would require
@@ -496,7 +510,19 @@ guarantees as to what will happen if an unsorted list is passed to a binary
 search.
 
 =item * Data that is more complex than simple numeric or string lists will
-require a custom comparator.
+require a custom comparator or transform subroutine.  This includes search
+keys that are buried within data structures.
+
+=item * These functions are prototyped, either as (&$\@), or as ($\@).  What
+this implementation detail means is that C<@haystack> is implicitly and
+invisibly passed by reference.  Thus, bare lists will not work.  This
+downside of prototypes is an unfortunate side effect of specifying an API that
+closely matches the one commonly used with List::Util and List::MoreUtils
+functions.  It can contribute to surprise when the user tries to pass a bare
+list.  The upside is a more familiar user interface, and the efficiency
+of pass-by-ref.
+
+
 
 =back
 
@@ -571,6 +597,10 @@ L<http://search.cpan.org/dist/List-BinarySearch/>
 
 
 =head1 ACKNOWLEDGEMENTS
+
+A thank-you to L<http://search.cpan.org/~corion/|Max Maischein> for being a
+willing and helpful sounding board on API issues, and for spotting some POD
+problems.
 
 I<Necessity, who is the mother of invention.> -- plato.
 
