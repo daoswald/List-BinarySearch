@@ -32,13 +32,13 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 Stable release.
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
 
@@ -162,14 +162,15 @@ finally, optimize.
 
 =head1 EXPORT
 
-Nothing is exported by default.  Upon request will export C<bsearch_custom>,
-C<bsearch_general>, or both functions by specifying C<:all>.
+Nothing is exported by default.  Upon request will export C<bsearch_str>,
+C<bsearch_num>, C<bsearch_general>, C<bsearch_custom>, and
+C<bsearch_transform>, or all functions by specifying C<:all>.
 
 =head1 SUBROUTINES/METHODS
 
 =head2 bsearch_str STRING_TARGET ARRAY
 
-    $first_found_ix = bsearch $target, $array_ref;
+    $first_found_ix = bsearch_str $target, $array_ref;
 
 Finds the string specified by C<$target> in the array C<@array>.  Return value
 is an index to the first (lowest numbered) matching element in
@@ -530,7 +531,7 @@ or suggestion, send me an email.
 
 Please report any bugs or feature requests to
 C<bug-list-binarysearch at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=List-BinarySearch>.  I will
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=List-BinarySearch>.  I will
 be notified, and then you'll automatically be notified of progress on your bug
 as I make changes.
 

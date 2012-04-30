@@ -1,6 +1,18 @@
 Revision history for List-BinarySearch
 
 
+0.03        4-30-2012 01:50am PDT
+    - STATUS:
+        - Stable.
+    - API CHANGES:
+        - None.
+    - BUG FIXES:
+        - POD corrections.
+    - USER ENHANCEMENTS:
+        - None aside from POD corrections.
+    - ADDITIONAL CODE ENHANCEMENTS:
+        - None.
+
 0.02        4-30-2012 01:21am PDT
     - STATUS:
         - Stable release.  API may only break compatibility after a
