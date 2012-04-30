@@ -13,9 +13,18 @@ require Exporter;
 # using 'parent'.  'parent' would exclude older Perls.  So we'll avoid the
 # issue by just using @ISA, as advised in the Exporter POD.
 
-our @ISA       = qw(Exporter);                       ## no critic (ISA)
-our @EXPORT_OK = qw( bsearch_array bsearch_list );
-our %EXPORT_TAGS = ( all => [qw( bsearch_array bsearch_list )] );
+our @ISA       = qw(Exporter);    ## no critic (ISA)
+our @EXPORT_OK = qw(
+    bsearch_str     bsearch_num     bsearch_custom
+    bsearch_general bsearch_transform
+);
+our %EXPORT_TAGS = ( all => \@EXPORT_OK );
+
+# I debated whether or not to use prototypes, decided that List::Util and
+# List::MoreUtils set the interface standard for these sorts of functions.
+# It seemed best to use a familiar interface.
+
+## no critic (prototypes)
 
 =head1 NAME
 
@@ -23,13 +32,15 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.01_003
-Developer's Release
+Version 0.03
+
+Stable release.
 
 =cut
 
-our $VERSION = '0.01_003';
-$VERSION = eval $VERSION;    ## no critic (eval,version)
+our $VERSION = '0.03';
+
+# $VERSION = eval $VERSION;    ## no critic (eval,version)
 
 =head1 SYNOPSIS
 
@@ -38,25 +49,45 @@ an array or list passed as a flat list.
 
 Examples:
 
-    use List::BinarySearch qw( bsearch_array bsearch_list );
+    use List::BinarySearch qw( :all );
+    use List::BinarySearch qw(
+        bsearch_str         bsearch_num         bsearch_general
+        bsearch_custom      bsearch_transform
+    );
 
-    my @array = ( 100, 200, 300, 400, 500 );
+    my @num_array =   ( 100, 200, 300, 400, 500 );
     my $index;
 
-    # Search an array passed by reference.
-    $index = bsearch_array( \@array, $target );
+    # Find the first index of element containing the number 300.
+    $index = bsearch_num       300, @num_array;
+    $index = bsearch_general   300, @num_array;
+    $index = bsearch_custom    { $_[0] <=> $_[1] } 300, @num_array;
+    $index = bsearch_transform { $_[0]           } 300, @num_array;
 
-    # Search an array passed by reference, using a custom comparator.
-    $index = bsearch_array( \@array, $target, sub { $_[0] cmp $_[1] } );
+    my @str_array = qw( Brahms Beethoven Schubert Mozart Bach );
 
-    # Search an array passed as a flat list.
-    $index = bsearch_list( $target, @array );
+    # Find the first index of element containing the string 'Mozart'.
+    $index = bsearch_str       'Mozart', @str_array;
+    $index = bsearch_general   'Mozart', @str_array;
+    $index = bsearch_custom    { $_[0] cmp $_[1] } 'Mozart', @str_array;
+    $index = bsearch_transform { $_[0]           } 'Mozart', @str_array;
 
-    # Search an array passed as a flat list, using a custom comparator.
-    $index = bsearch_list( $sub{ $_[0] cmp $_[1] }, $target, @array );
+    # All functions return 'undef' if nothing is found:
+    $index = bsearch_str 'Meatloaf', @str_array;    # not found: returns undef
+    $index = bsearch_num 42,         @num_array;    # not found: returns undef
 
-    # Returns undef:
-    $index = bsearch_array( \@array, 250 );  # 250 isn't found in @array.
+    # Complex data structures:
+    my @complex = (
+        [ 'one',   1 ],
+        [ 'two',   2 ],
+        [ 'three', 3 ],
+        [ 'four' , 4 ],
+        [ 'five' , 5 ],
+    );
+
+    # Find 'one' from the structure above:
+    $index = bsearch_custom { $_[0] cmp $_[1][0] } 'one', @complex;
+    $index = besarch_custom { $_[1][0]           } 'one', @complex;
 
 =head1 DESCRIPTION
 
@@ -80,9 +111,9 @@ would return the first one found, which may not be the chronological first.
 searches may find the target in fewer iterations in the best case, but in the
 worst case would still be O(log n).
 
-=item * Stable binary searches only require one relational comparison per
-iteration, where unstable binary searches require two conditionals per
-iteration.
+=item * Stable binary searches only require one relational comparison of a
+given pair of data elements per iteration, where unstable binary searches
+require two comparisons per iteration.
 
 =item * The net result is that although an unstable binary search might have
 a better "best case" time complexity, the fact that a stable binary search
@@ -96,8 +127,9 @@ element in a range of non-unique keys.
 
 =head1 RATIONALE
 
-Quoting from L<Wikipedia|http://en.wikipedia.org/wiki/Binary_search_algorithm>:
-I<When Jon Bentley assigned it as a problem in a course for professional
+Quoting from
+L<Wikipedia|http://en.wikipedia.org/wiki/Binary_search_algorithm>:  I<When Jon
+Bentley assigned it as a problem in a course for professional
 programmers, he found that an astounding ninety percent failed to code a
 binary search correctly after several hours of working on it, and another
 study shows that accurate code for it is only found in five out of twenty
@@ -105,65 +137,171 @@ textbooks. Furthermore, Bentley's own implementation of binary search,
 published in his 1986 book Programming Pearls, contains an error that remained
 undetected for over twenty years.>
 
-So the answer to the question "Why use a module for this?" is "Because it's
-already written and tested, so that you won't have to write and test your own
-implementation.
+So the answer to the question "Why use a module for this?" is "Because it has
+already been written and tested.  You don't have to write, test, and debug
+your own implementation.
 
 Nevertheless, before using this module the user should weigh the other
 options: linear searches ( C<grep> or C<List::Util::first> ), or hash based
 searches. A binary search only makes sense if the data set is already sorted
 in ascending order, and if it is determined that the cost of a linear search,
-or the linear-time conversion to a hash-based container is too inefficient.
-So often, it just doesn't make sense to try to optimize beyond what Perl's
-tools natively provide.
+or the linear-time conversion to a hash-based container is too inefficient or
+demands too much memory.  So often, it just doesn't make sense to try to
+optimize beyond what Perl's tools natively provide.
 
-However, in some cases, a binary search can be an excellent choice.  Finding
-the first matching element in a list of 1,000,000 items with a linear search
-would have a worst-case of 1,000,000 iterations, whereas the worst case for
-a binary search of 1,000,000 elements is about 20 iterations.  If many lookups
-will be performed on a list, the savings of O(log n) lookups may outweigh
-the cost of sorting.
+However, there are cases where, a binary search may be an excellent choice.
+Finding the first matching element in a list of 1,000,000 items with a linear
+search would have a worst-case of 1,000,000 iterations, whereas the worst case
+for a binary search of 1,000,000 elements is about 20 iterations.  In fact, if
+many lookups will be performed on a seldom-changed list, the savings of
+O(log n) lookups may outweigh the cost of sorting or performing occasional
+ordered inserts.
 
-Profile, then benchmark, then consider the options, and finally, optimize.
+Profile, then benchmark, then consider (and benchmark) the options, and
+finally, optimize.
 
 =head1 EXPORT
 
-Nothing is exported by default.  Upon request will export C<bsearch_array>,
-C<bsearch_list>, or both functions by specifying C<:all>.
+Nothing is exported by default.  Upon request will export C<bsearch_str>,
+C<bsearch_num>, C<bsearch_general>, C<bsearch_custom>, and
+C<bsearch_transform>, or all functions by specifying C<:all>.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 bsearch_array
+=head2 bsearch_str STRING_TARGET ARRAY
 
-    $first_found_ix = bsearch_array( $array_ref, $target );
-    $first_found_ix = bsearch_array( $array_ref, $target, \&comparator );
+    $first_found_ix = bsearch_str $target, $array_ref;
 
-Pass a reference to an array to be searched, a target item to find, and
-optionally a reference to a comparator subroutine.
+Finds the string specified by C<$target> in the array C<@array>.  Return value
+is an index to the first (lowest numbered) matching element in
+C<@array>, or C<undef> if nothing is found.  String comparisons are used.
+The target must be an exact and complete match.
 
-If no comparator is passed, the search algorithm will try to determine if
-C<$target> looks like a number or like a string.  If C<$target> looks like a
-number, the default search will use numeric comparison.  If C<$target> doesn't
-look like a number, the default search will use string comparison.
+=cut
 
-Internally Scalar::Util::looks_like_number is used to decide whether to use
-numeric or stringwise comparisons in the absence of an explicit comparator
-subroutine.
+sub bsearch_str ($\@) {
+    my ( $target, $aref ) = @_;
+
+    my $min = 0;
+    my $max = $#{$aref};
+    while ( $max > $min ) {
+        my $mid = int( ( $min + $max ) / 2 );
+        if ( $target gt $aref->[$mid] ) {
+            $min = $mid + 1;
+        }
+        else {
+            $max = $mid;
+        }
+    }
+    return $min
+        if $max == $min && $target eq $aref->[$min];
+    return;    # Undef in scalar context, empty list in list context.
+}
+
+=head2 bsearch_num NUMERIC_TARGET ARRAY
+
+    $first_found_ix = bsearch $target, $array_ref;
+
+Finds the numeric needle C<$target> in the haystack C<@array>.  Return value
+is an index to the first (lowest numbered) matching element in C<@array>, or
+C<undef> if C<$target> isn't found.
+
+The comparison type is numeric.
+
+=cut
+
+sub bsearch_num ($\@) {
+    my ( $target, $aref ) = @_;
+
+    my $min = 0;
+    my $max = $#{$aref};
+    while ( $max > $min ) {
+        my $mid = int( ( $min + $max ) / 2 );
+        if ( $target > $aref->[$mid] ) {
+            $min = $mid + 1;
+        }
+        else {
+            $max = $mid;
+        }
+    }
+    return $min
+        if $max == $min && $target == $aref->[$min];
+    return;    # Undef in scalar context, empty list in list context.
+}
+
+=head2 bsearch_general TARGET ARRAY
+
+    $first_found_ix = bsearch_general $target, @array;
+
+Detects whether C<$target> is a string or number, and performs the
+appropriate comparisons to find C<$target> in the haystack C<@array>.  Return
+value is an index to the first (lowest numbered) matching element in
+C<@array>.
+
+The comparison type is automatically detected for numbers or strings.  This
+extra magic is a convenience that does incur a small performance penalty.
+
+If C<$target> isn't found, the return value will be C<undef>.
+
+=cut
+
+sub bsearch_general ($\@) {
+    my ( $target, $aref ) = @_;
+    my $min = 0;
+    my $max = $#{$aref};
+    if ( looks_like_number $target ) {
+        while ( $max > $min ) {
+            my $mid = int( ( $min + $max ) / 2 );
+            if ( $target > $aref->[$mid] ) {
+                $min = $mid + 1;
+            }
+            else {
+                $max = $mid;
+            }
+        }
+        return $min
+            if $max == $min && $target == $aref->[$min];
+    }
+    else {
+        while ( $max > $min ) {
+            my $mid = int( ( $min + $max ) / 2 );
+            if ( $target gt $aref->[$mid] ) {
+                $min = $mid + 1;
+            }
+            else {
+                $max = $mid;
+            }
+        }
+        return $min
+            if $max == $min && $target eq $aref->[$min];
+    }
+    return;    # Undef in scalar context, empty list in list context.
+}
+
+=head2 bsearch_custom CODE TARGET ARRAY
+
+    $first_found_ix = bsearch_custom { $_[0] cmp $_[1] } $target, @array;
+    $first_found_ix = bsearch_custom \&comparator,       $target, @array;
+
+Pass a code block or subref, a search target, and an array to search.  Uses
+the subroutine suppled in the code block or subref callback to test C<target>
+against elements in C<@array>.
 
 Return value is the index of the first element equalling C<$target>.  If no
 element is found, undef is returned.
 
+Beware a potential 'I<gotcha>': When dealing with complex data structures, the
+callback function will have an asymmetrical look to it, which is easy to
+get wrong.  The target will always be referred to by C<$_[0]>, but the right
+hand side of the comparison must refer to the C<$_[1]...>, where C<...> is
+the portion of the data structure to be used in the comparison: C<$_[1][$n]>,
+or C<$_[1]{$k}>, for example.
+
 =cut
 
-sub bsearch_array {
-    my ( $aref, $target, $code ) = @_;
+sub bsearch_custom (&$\@) {
 
-    if( ! defined( $code ) ) {
-        $code =
-            looks_like_number($target)
-            ? sub { $_[0] <=> $_[1] }
-            : sub { $_[0] cmp $_[1] };
-    }
+    my ( $code, $target, $aref ) = @_;
 
     my $min = 0;
     my $max = $#{$aref};
@@ -181,40 +319,67 @@ sub bsearch_array {
     return;    # Undef in scalar context, empty list in list context.
 }
 
-=head2 bsearch_list
+=head2 bsearch_transform CODE TARGET ARRAY
 
-    $first_found_ix = bsearch_list( $target, @list );
-    $first_found_ix = bsearch_list( \&comparator, $target, @list );
+    $first_found_ix = bsearch_transform { $_[0] }      $target, @array;
+    $first_found_ix = bsearch_transform \&transformer, $target, @array );
 
-Pass an optional reference to a comparator subroutine, a target, and a flat
-list to be searched.
+Pass a transform code block or subref, a target to find, and an array to find
+it in.  Return value is the lowest numbered index to an element matching
+C<$target>, or C<undef> if nothing is found.
 
-If no comparator is passed, the search algorithm will try to determine if
-C<$target> looks like a number or like a string.  If C<$target> looks like a
-number, the default search will use numeric comparison.  If C<$target> doesn't
-look like a number, the default search will use string comparison.
+This algorithm detects whether C<$target> looks like a number or a string.  If
+it looks like a number, numeric comparisons are performed.  Otherwise,
+stringwise comparisons are used.  The transform code block or coderef is
+used to transform each element of the search array to a value that can be
+compared against the target.  This is useful if C<@array> contains a complex
+data structure, and less prone to user error in such cases than
+C<bsearch_custom>.
 
-Internally Scalar::Util::looks_like_number is used to decide whether to
-default to numeric or stringwise comparisons in the absence of an explicit
-comparator subroutine.
-
-Return value is the index of the first element equalling C<$target>.  If no
-element is found, undef is returned.
+If no transformation is needed, use C<bsearch_str>, C<bsearch_num>, or
+C<bsearch_custom>.
 
 =cut
 
-## no critic (unpack)
-sub bsearch_list {
-    my $code;
-    if ( ref( $_[0] ) =~ /CODE/sm ) {
-        $code = shift;
+sub bsearch_transform (&$\@) {
+
+    my ( $transform_code, $target, $aref ) = @_;
+    my ( $min, $max ) = ( 0, $#{$aref} );
+
+    if ( looks_like_number $target ) {
+        while ( $max > $min ) {
+            my $mid = int( ( $min + $max ) / 2 );
+            if ( $target > $transform_code->( $aref->[$mid] ) ) {
+                $min = $mid + 1;
+            }
+            else {
+                $max = $mid;
+            }
+        }
+        return $min
+            if $max == $min && $target == $transform_code->( $aref->[$min] );
     }
-    my $target = shift;
-    return bsearch_array( \@_, $target, $code );
+    else {
+        while ( $max > $min ) {
+            my $mid = int( ( $min + $max ) / 2 );
+            if ( $target gt $transform_code->( $aref->[$mid] ) ) {
+                $min = $mid + 1;
+            }
+            else {
+                $max = $mid;
+            }
+        }
+        return $min
+            if $max == $min && $target eq $transform_code->( $aref->[$min] );
+    }
+    return;    # Undef in scalar context, empty list in list context.
 }
 
 =head2 \&comparator
-(callback)
+
+B<(callback)>
+
+Comparator functions are used by C<bsearch_custom>.
 
 Comparators are references to functions that accept as parameters a target,
 and a list element, returning the result of the relational comparison of the
@@ -222,8 +387,7 @@ two values.  A good example would be the code block in a C<sort> function,
 except that our comparators get their input from C<@_>, where C<sort>'s
 comparator functions get their input from C<$a> and C<$b>.
 
-
-The default comparators are defined like this:
+Basic comparators might be defined like this:
 
     # Numeric comparisons:
     $comp = sub {
@@ -236,13 +400,6 @@ The default comparators are defined like this:
         my( $target, $list_item ) = @_;
         return $target cmp $list_item;
     };
-
-Optionally the user may supply a custom comparator to override default
-comparison logic.  A custom comparator function should return:
-
-    -1 if $target <  $list_item
-     0 if $target == $list_item
-     1 if $target >  $list_item
 
 The first parameter passed to the comparator will be the target.  The second
 parameter will be the contents of the element being tested.  This leads to
@@ -268,15 +425,50 @@ A numeric custom comparator for such a data structure would look like this:
         return $target <=> $list_item->[0];
     }
 
-Therefore, a call to C<bsearch_list> where the target is to solve for
+Therefore, a call to C<bsearch_custom> where the target is to solve for
 C<$unknown> such that C<$structure[$unknown][0] == 200> might look like this:
 
-    my $found_ix = bsearch_list( sub{ $_[0] <=> $_[1][0] }, 200, @structure );
+    my $found_ix = bsearch_custom { $_[0] <=> $_[1][0] }, 200, @structure;
     print $structure[$found_ix][1], "\n" if defined $found_ix;
     # prints 'frog'
 
 
-=cut
+=head2 \&transform
+
+B<(callback)>
+
+The transform callback routine is used by C<bsearch_transform()>
+to transform a given search list element into something that can be compared
+against C<$target>.  As an example, consider the following complex data
+structure:
+
+    my @structure = (
+        [ 100, 'ape'  ],
+        [ 200, 'frog' ],
+        [ 300, 'dog'  ],
+        [ 400, 'cat'  ]
+    );
+
+If the goal is do a numeric search using the first element of each
+integer/string pair, the transform sub might be written like this:
+
+    sub transform {
+        return $_[0][0];    # Returns 100, 200, 300, etc.
+    }
+
+Or if the goal is instead to search by the second element of each int/str
+pair, the sub would instead look like this:
+
+    sub transform {
+        return $_[0][1];
+    }
+
+A transform sub that results in each list element being compared as-is
+against the target would be:
+
+    sub transform { $_[0] }
+
+This will be recognized, of course, as an identity sub.
 
 =head1 DATA SET REQUIREMENTS
 
@@ -333,15 +525,13 @@ If the documentation fails to answer your question, or if you have a comment
 or suggestion, send me an email.
 
 =head1 DIAGNOSTICS
-=head1 BUGS AND LIMITATIONS
 
-This is an early developer's release.  The API can (and probably will) change.
-Version numbers in this format: C<x.xx_xxx> are dev releases.
-Version numbers in this format: C<x.xx> are stable.
+
+=head1 BUGS AND LIMITATIONS
 
 Please report any bugs or feature requests to
 C<bug-list-binarysearch at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=List-BinarySearch>.  I will
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=List-BinarySearch>.  I will
 be notified, and then you'll automatically be notified of progress on your bug
 as I make changes.
 
@@ -352,7 +542,8 @@ You can find documentation for this module with the perldoc command.
 
     perldoc List::BinarySearch
 
-You can also look for information at:
+This module is maintained in a public repo at Github.  You may look for
+information at:
 
 =over 4
 

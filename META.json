@@ -22,7 +22,7 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "Test::More" : "0"
+            "Test::More" : "0.98"
          }
       },
       "configure" : {
@@ -36,6 +36,6 @@
          }
       }
    },
-   "release_status" : "testing",
-   "version" : "0.01_003"
+   "release_status" : "stable",
+   "version" : "0.03"
 }

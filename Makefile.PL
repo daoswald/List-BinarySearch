@@ -13,7 +13,7 @@ WriteMakefile(
       : ()),
     PL_FILES            => {},
     BUILD_REQUIRES		=> {
-		'Test::More' => 0,
+		'Test::More' => '0.98',
 	},
     PREREQ_PM => {
         'Scalar::Util' => 0,
