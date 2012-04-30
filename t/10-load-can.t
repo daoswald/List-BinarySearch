@@ -6,7 +6,7 @@ use warnings;
 use Test::More tests => 2;
 
 BEGIN {
-    use_ok( 'List::BinarySearch', qw( bsearch_arrayref bsearch_list bsearch_transform_arrayref ) )
+    use_ok( 'List::BinarySearch', qw( :all ) )
         || BAIL_OUT();
 }
 
@@ -15,6 +15,13 @@ diag( "Testing List::BinarySearch " .
 );
 
 
-can_ok( 'List::BinarySearch', qw( bsearch_arrayref bsearch_list bsearch_transform_arrayref ) );
+can_ok(
+    'List::BinarySearch',
+    qw(
+        bsearch_str         bsearch_num
+        bsearch_custom      bsearch_general
+        bsearch_transform
+    )
+);
 
 done_testing();
