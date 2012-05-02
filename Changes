@@ -1,18 +1,26 @@
 Revision history for List-BinarySearch
 
-0.04        4-30-2012 9:11am PDT
+0.05		05-01-2012 11:33pm PDT
+	- STATUS:
+		- Stable.
+	- BUG FIXES:
+		- POD corrections
+			- Example code.
+			- Spelling.
+
+0.04        04-30-2012 9:11am PDT
     - STATUS:
         - Stable.
     -BUG FIXES:
         - POD corrections (Thanks to Corion).
 
-0.03        4-30-2012 01:50am PDT
+0.03        04-30-2012 01:50am PDT
     - STATUS:
         - Stable.
     - BUG FIXES:
         - POD corrections.
 
-0.02        4-30-2012 01:21am PDT
+0.02        04-30-2012 01:21am PDT
     - STATUS:
         - Stable release.  API may only break compatibility after a
           deprecation cycle.
@@ -33,7 +41,7 @@ Revision history for List-BinarySearch
         - Several logic paths were unrolled to eliminate costly subroutine
           calls inside of tight loops.
 
-0.01_005    4-28-2012 10:43pm PDT
+0.01_005    04-28-2012 10:43pm PDT
     - STATUS:
         - Beta testing.  API may change.
         - Developer's release.
@@ -51,7 +59,7 @@ Revision history for List-BinarySearch
         - Test t/11-search.t modified to support API changes.
         - Reworded a few portions of the POD for (hopefully) better clarity.
 
-0.01_004    4-27-2012 01:23am PDT
+0.01_004    04-27-2012 01:23am PDT
     - STATUS
         - Beta testing.  API may change.
         - Developer's release.
@@ -64,7 +72,7 @@ Revision history for List-BinarySearch
     - ADDITIONAL CODE ENHANCEMENTS:
         - Added a few more tests to 11-search.t.
 
-0.01_003    4-25-2012 09:40am PDT
+0.01_003    04-25-2012 09:40am PDT
     - STATUS:
         - Beta testing.  API may change.
         - Developer's release.
@@ -78,7 +86,7 @@ Revision history for List-BinarySearch
     - ADDITIONAL CODE ENHANCEMENTS:
         - None.
 
-0.01_002    4-25-2012 01:00am PDT
+0.01_002    04-25-2012 01:00am PDT
     - STATUS:
         - Beta testing. API may change.
         - Developer's release.
@@ -92,7 +100,7 @@ Revision history for List-BinarySearch
         - List/BinarySearch.pm is now Perl::Critic level 2 compliant.
         - Test suite is Perl::Critic level 4 compliant.
 
-0.01_001    4-23-2012
+0.01_001    04-23-2012
     - Beta testing.  API may change.
     - Developer's release.
     - Initial release to CPAN.

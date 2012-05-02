@@ -38,7 +38,7 @@ Stable release.
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
 
