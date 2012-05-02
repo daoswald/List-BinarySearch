@@ -32,7 +32,7 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 Stable release.
 
@@ -213,11 +213,11 @@ sub bsearch_str ($\@) {
 
 =head2 bsearch_num NUMERIC_NEEDLE ARRAY_HAYSTACK
 
-    $first_found_ix = bsearch $needle, @haystack;
+    $first_found_ix = bsearch_num $needle, @haystack;
 
-Finds the numeric needle C<$needle> in the haystack C<@haystack>.  Return
-value is an index to the first (lowest numbered) matching element in
-C<@haystack>, or C<undef> if C<$needle> isn't found.
+Finds the numeric needle C<$needle> in the haystack C<@haystack>.  
+Return value is an index to the first (lowest numbered) matching element 
+in C<@haystack>, or C<undef> if C<$needle> isn't found.
 
 The comparison type is numeric.
 
@@ -297,10 +297,10 @@ sub bsearch_general ($\@) {
     $first_found_ix = bsearch_custom \&comparator,       $needle, @haystack;
 
 Pass a code block or subref, a search target, and an array to search.  Uses
-the subroutine suppled in the code block or subref callback to test C<$needle>
+the subroutine supplied in the code block or subref callback to test C<$needle>
 against elements in C<@haystack>.
 
-Return value is the index of the first element equalling C<$needle>.  If no
+Return value is the index of the first element equaling C<$needle>.  If no
 element is found, undef is returned.
 
 Beware a potential 'I<gotcha>': When dealing with complex data structures, the
@@ -416,15 +416,15 @@ Basic comparators might be defined like this:
 
 The first parameter passed to the comparator will be the target.  The second
 parameter will be the contents of the element being tested.  This leads to
-an asymetry that might be prone to "gotchas" when writing custom comparators
+an asymmetry that might be prone to "gotchas" when writing custom comparators
 for searching complex data structures.  As an example, consider the following
 data structure:
 
     my @structure = (
         [ 100, 'ape'  ],
-        [ 200, 'cat' ],
+        [ 200, 'cat'  ],
         [ 300, 'dog'  ],
-        [ 400, 'frog'  ]
+        [ 400, 'frog' ]
     );
 
 A numeric custom comparator for such a data structure would look like this:
@@ -458,9 +458,9 @@ structure:
 
     my @structure = (
         [ 100, 'ape'  ],
-        [ 200, 'cat' ],
+        [ 200, 'cat'  ],
         [ 300, 'dog'  ],
-        [ 400, 'frog'  ]
+        [ 400, 'frog' ]
     );
 
 If the goal is do a numeric search using the first element of each
@@ -470,19 +470,20 @@ integer/string pair, the transform sub might be written like this:
         return $_[0][0];    # Returns 100, 200, 300, etc.
     }
 
-Or if the goal is instead to search by the second element of each int/str
-pair, the sub would instead look like this:
+Or if the goal is instead to search by the second element of each 
+int/str pair, the sub would instead look like this:
 
     sub transform {
         return $_[0][1];
     }
 
-A transform sub that results in each list element being compared as-is
-against the target would be:
+A transform sub that performs no transform would be a simple identity
+function:
 
     sub transform { $_[0] }
 
-This will be recognized, of course, as an identity sub.
+...but just use C<bsearch_general>, because that's what it does, without
+the callback.
 
 =head1 DATA SET REQUIREMENTS
 
@@ -494,33 +495,34 @@ are:
 
 =item * B<The lists must be in ascending sorted order>.
 
-This is a big one.  Keep in mind that the best sort routines run in O(n log n)
-time.  It makes no sense to sort a list in O(n log n), and then perform a
-single O(log n) binary search when List::Util C<first> could accomplish the
-same thing in O(n) time.  A Binary Search only makes sense if there are other
-good reasons for keeping the data set sorted in the first place.
+This is a big one.  Keep in mind that the best sort routines run in
+O(n log n) time.  It makes no sense to sort a list in O(n log n), and 
+then perform a single O(log n) binary search when List::Util C<first> 
+could accomplish the same thing in O(n) time.  A Binary Search only 
+makes sense if there are other good reasons for keeping the data set 
+sorted in the first place.
 
-B<Passing an unsorted list to these Binary Search algorithms will result in
-undefined behavior.  There is validity checking.>
+B<Passing an unsorted list to these Binary Search algorithms will result 
+in undefined behavior.  There is validity checking.>
 
-A Binary Search consumes O(log n) time.  It would, therefore, be foolish for
-these algorithms to pre-check the list for sortedness, as that would require
-linear, or O(n) time.  Since no sortedness testing is done, there can be no
-guarantees as to what will happen if an unsorted list is passed to a binary
-search.
+A Binary Search consumes O(log n) time.  It would, therefore, be foolish 
+for these algorithms to pre-check the list for sortedness, as that would 
+require linear, or O(n) time.  Since no sortedness testing is done, 
+there can be no guarantees as to what will happen if an unsorted list is 
+passed to a binary search.
 
-=item * Data that is more complex than simple numeric or string lists will
-require a custom comparator or transform subroutine.  This includes search
-keys that are buried within data structures.
+=item * Data that is more complex than simple numeric or string lists 
+will require a custom comparator or transform subroutine.  This includes 
+search keys that are buried within data structures.
 
-=item * These functions are prototyped, either as (&$\@), or as ($\@).  What
-this implementation detail means is that C<@haystack> is implicitly and
-invisibly passed by reference.  Thus, bare lists will not work.  This
-downside of prototypes is an unfortunate side effect of specifying an API that
-closely matches the one commonly used with List::Util and List::MoreUtils
-functions.  It can contribute to surprise when the user tries to pass a bare
-list.  The upside is a more familiar user interface, and the efficiency
-of pass-by-ref.
+=item * These functions are prototyped, either as (&$\@), or as ($\@).  
+What this implementation detail means is that C<@haystack> is implicitly 
+and invisibly passed by reference.  Thus, bare lists will not work.  
+This downside of prototypes is an unfortunate side effect of specifying 
+an API thatclosely matches the one commonly used with List::Util and 
+List::MoreUtils functions.  It can contribute to surprise when the user 
+tries to pass a bare list.  The upside is a more familiar user 
+interface, and the efficiency of pass-by-ref.
 
 
 
