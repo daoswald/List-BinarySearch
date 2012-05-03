@@ -33,13 +33,15 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 Stable release.
 
+New functions: bsearch_num_pos, bsearch_str_pos, bsearch_general_range.
+
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
 
@@ -521,8 +523,8 @@ sub bsearch_general_range ($$\@) {
     my( $low_target, $high_target, $aref ) = @_;
     my( $index_low, $index_high );
     if( looks_like_number $low_target and looks_like_number $high_target ) {
-        my $index_low  = bsearch_num_pos( $low_target,  @{$aref} );
-        my $index_high = bsearch_num_pos( $high_target, @{$aref} );
+        $index_low  = bsearch_num_pos( $low_target,  @{$aref} );
+        $index_high = bsearch_num_pos( $high_target, @{$aref} );
         if(
                $index_high == @{$aref}
             or $aref->[$index_high] > $high_target
@@ -531,8 +533,8 @@ sub bsearch_general_range ($$\@) {
         }
     }
     else {
-        my $index_low  = bsearch_str_pos( $low_target,  @{$aref} );
-        my $index_high = bsearch_str_pos( $high_target, @{$aref} );
+        $index_low  = bsearch_str_pos( $low_target,  @{$aref} );
+        $index_high = bsearch_str_pos( $high_target, @{$aref} );
         if(
                $index_high == @{$aref}
             or $aref->[$index_high] gt $high_target
@@ -755,9 +757,16 @@ L<http://search.cpan.org/dist/List-BinarySearch/>
 
 =head1 ACKNOWLEDGEMENTS
 
-A thank-you to L<http://search.cpan.org/~corion/|Max Maischein> for being a
-willing and helpful sounding board on API issues, and for spotting some POD
-problems.
+Thank-you to L<http://search.cpan.org/~corion/|Max Maischein> (Corion) for
+being a willing and helpful sounding board on API issues, and for spotting
+some POD problems.
+
+L<http://shop.oreilly.com/product/9781565923980.do|Mastering Algorithms with Perl>,
+from L<http://www.oreilly.com|O'Reilly>: for the inspiration (and much of the
+code) behind the positional and ranged searches.  Quoting MAwP: "I<...the
+binary search was first documented in 1946 but the first algorithm that worked
+for all sizes of array was not published until 1962.>" (A summary of a passage
+from Knuth: Sorting and Searching, 6.2.1.)
 
 I<Necessity, who is the mother of invention.> -- plato.
 
