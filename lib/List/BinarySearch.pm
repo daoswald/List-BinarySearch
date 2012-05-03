@@ -15,8 +15,9 @@ require Exporter;
 
 our @ISA       = qw(Exporter);    ## no critic (ISA)
 our @EXPORT_OK = qw(
-    bsearch_str     bsearch_num     bsearch_custom
-    bsearch_general bsearch_transform
+    bsearch_str     bsearch_num             bsearch_custom
+    bsearch_general bsearch_transform       bsearch_str_pos
+    bsearch_num_pos bsearch_general_range
 );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
@@ -100,6 +101,22 @@ Examples:
 
     $index = bsearch_custom    { $_[0] cmp $_[1][0] } 'one', @complex;
     $index = besarch_transform { $_[1][0]           } 'one', @complex;
+
+
+    # Return an insert point upon failure to find $needle:
+
+    my @str_array = qw( Bach Beethoven Brahms Mozart Schubert );
+    my @num_array = ( 100, 200, 300, 400 );
+
+    $index = bsearch_str_pos 'Chopin', @str_array; # Returns 3 - Best insert-at position.
+    $index = bsearch_num_pos 500, @num_array; # Returns 4 - Best insert-at position.
+
+
+    # Return a range between and inclusive of $low_needle and $high_needle
+
+    my( $low_ix, $high_ix )
+        = bsearch_general_range( 'Beethoven', 'Mozart', @str_array );
+        # Returns ( 1, 3 ), meaning ( 1 .. 3 ).
 
 
 =head1 DESCRIPTION
@@ -215,8 +232,8 @@ sub bsearch_str ($\@) {
 
     $first_found_ix = bsearch_num $needle, @haystack;
 
-Finds the numeric needle C<$needle> in the haystack C<@haystack>.  
-Return value is an index to the first (lowest numbered) matching element 
+Finds the numeric needle C<$needle> in the haystack C<@haystack>.
+Return value is an index to the first (lowest numbered) matching element
 in C<@haystack>, or C<undef> if C<$needle> isn't found.
 
 The comparison type is numeric.
@@ -297,8 +314,8 @@ sub bsearch_general ($\@) {
     $first_found_ix = bsearch_custom \&comparator,       $needle, @haystack;
 
 Pass a code block or subref, a search target, and an array to search.  Uses
-the subroutine supplied in the code block or subref callback to test C<$needle>
-against elements in C<@haystack>.
+the subroutine supplied in the code block or subref callback to test
+C<$needle> against elements in C<@haystack>.
 
 Return value is the index of the first element equaling C<$needle>.  If no
 element is found, undef is returned.
@@ -388,6 +405,144 @@ sub bsearch_transform (&$\@) {
     return;    # Undef in scalar context, empty list in list context.
 }
 
+=head2 bsearch_str_pos STRING_NEEDLE ARRAY_HAYSTACK
+
+    $first_found_ix = bsearch_str_pos $needle, @haystack;
+
+The only difference between this function and C<bsearch_str> is its return
+value upon failure.  C<bsearch_str> returns undef upon failure.
+C<bsearch_str_pos> returns the index of a valid insert point for C<$needle>
+
+Finds the string specified by C<$needle> in the array C<@haystack>.  Return
+value is an index to the first (lowest numbered) matching element in
+C<@haystack>.  If C<$needle> isn't found, return value is the index of where
+C<$needle> could appropriately be inserted.  String comparisons are used.
+The target must be an exact and complete match.
+
+The position returned upon failure to find C<$needle> satisfies these
+requirements:  If C<$needle> is greater than all elements in C<@haystack>,
+then the return value will be equal to C<scalar @haystack>.  If C<$needle> is
+within the range represented by C<@haystack>, the return value will be the
+index of the first element greater in value than C<$needle>.  In either case,
+the following code could then be used to add C<$needle> to C<@haystack> if it
+isn't found:
+
+    my $index = bsearch_str_pos $needle, @haystack;
+    if( $needle ne $haystack[$index] ) {
+        splice @haystack, $index, 0, $needle;
+    }
+
+
+=cut
+
+
+
+sub bsearch_str_pos ($\@) {
+    my ( $target, $aref ) = @_;
+    my ( $low, $high ) = ( 0, scalar @{$aref} );
+    while ( $low < $high ) {
+        use integer;
+        my $cur = ( $low + $high ) / 2;
+        if ($aref->[$cur] lt $target) {
+            $low  = $cur + 1;                   # too small, try higher
+        } else {
+            $high = $cur;                       # not too small, try lower
+        }
+    }
+    return $low;
+}
+
+=head2 bsearch_num_pos NUMERIC_NEEDLE ARRAY_HAYSTACK
+
+    $first_found_ix = bsearch_num_pos $needle, @haystack;
+
+The only difference between this function and C<bsearch_num> is its return
+value upon failure.  C<bsearch_num> returns undef upon failure.
+C<bsearch_num_pos> returns the index of a valid insert point for C<$needle>
+
+Finds the string specified by C<$needle> in the array C<@haystack>.  Return
+value is an index to the first (lowest numbered) matching element in
+C<@haystack>.  If C<$needle> isn't found, return value is the index of where
+C<$needle> could appropriately be inserted.  String comparisons are used.
+The target must be an exact and complete match.
+
+The position returned upon failure to find C<$needle> satisfies these
+requirements:  If C<$needle> is greater than all elements in C<@haystack>,
+then the return value will be equal to C<scalar @haystack>.  If C<$needle> is
+less than, or within the range represented by C<@haystack>, the return value
+will be the index of the first element greater in value than C<$needle>.  In
+either case, the following code could then be used to add C<$needle> to
+C<@haystack> if it isn't found:
+
+    my $index = bsearch_num_pos $needle, @haystack;
+    if( $needle != $haystack[$index] ) {
+        splice @haystack, $index, 0, $needle;
+    }
+
+
+=cut
+
+
+
+sub bsearch_num_pos ($\@) {
+    my ( $target, $aref ) = @_;
+    my ( $low, $high ) = ( 0, scalar @{$aref} );
+    while ( $low < $high ) {
+        my $cur = int( ( $low + $high ) / 2 );
+        if ($aref->[$cur] < $target) {
+            $low  = $cur + 1;                   # too small, try higher
+        } else {
+            $high = $cur;                       # not too small, try lower
+        }
+    }
+    return $low;
+}
+
+=head2 bsearch_general_range LOW_NEEDLE HIGH_NEEDLE ARRAY_HAYSTACK
+
+    $first_found_ix = bsearch_general_range $low_needle, $high_needle, @haystack;
+
+Returns a pair of indices that represent an inclusive range of elements from
+C<$low_needle> through C<$high_needle>.  This is a general function.  It
+automatically detects whether both targets are numeric, or not.  If both
+targets are numeric, numeric comparisons are used in the search.  Otherwise,
+string comparisons are used.
+
+Here's an example:
+
+    my @haystack = ( 100, 200, 300, 400, 500 );
+    my( $low, $high ) = bsearch_general_range 200, 400, @haystack;
+    my @found = @haystack[ $low .. $high ]; # @found holds ( 200, 300, 400 ).
+
+
+=cut
+
+sub bsearch_general_range ($$\@) {
+    my( $low_target, $high_target, $aref ) = @_;
+    my( $index_low, $index_high );
+    if( looks_like_number $low_target and looks_like_number $high_target ) {
+        my $index_low  = bsearch_num_pos( $low_target,  @{$aref} );
+        my $index_high = bsearch_num_pos( $high_target, @{$aref} );
+        if(
+               $index_high == @{$aref}
+            or $aref->[$index_high] > $high_target
+        ) {
+            $index_high--;
+        }
+    }
+    else {
+        my $index_low  = bsearch_str_pos( $low_target,  @{$aref} );
+        my $index_high = bsearch_str_pos( $high_target, @{$aref} );
+        if(
+               $index_high == @{$aref}
+            or $aref->[$index_high] gt $high_target
+        ) {
+            $index_high--;
+        }
+    }
+    return( $index_low, $index_high );
+}
+
 =head2 \&comparator
 
 B<(callback)>
@@ -470,7 +625,7 @@ integer/string pair, the transform sub might be written like this:
         return $_[0][0];    # Returns 100, 200, 300, etc.
     }
 
-Or if the goal is instead to search by the second element of each 
+Or if the goal is instead to search by the second element of each
 int/str pair, the sub would instead look like this:
 
     sub transform {
@@ -496,32 +651,32 @@ are:
 =item * B<The lists must be in ascending sorted order>.
 
 This is a big one.  Keep in mind that the best sort routines run in
-O(n log n) time.  It makes no sense to sort a list in O(n log n), and 
-then perform a single O(log n) binary search when List::Util C<first> 
-could accomplish the same thing in O(n) time.  A Binary Search only 
-makes sense if there are other good reasons for keeping the data set 
+O(n log n) time.  It makes no sense to sort a list in O(n log n), and
+then perform a single O(log n) binary search when List::Util C<first>
+could accomplish the same thing in O(n) time.  A Binary Search only
+makes sense if there are other good reasons for keeping the data set
 sorted in the first place.
 
-B<Passing an unsorted list to these Binary Search algorithms will result 
+B<Passing an unsorted list to these Binary Search algorithms will result
 in undefined behavior.  There is validity checking.>
 
-A Binary Search consumes O(log n) time.  It would, therefore, be foolish 
-for these algorithms to pre-check the list for sortedness, as that would 
-require linear, or O(n) time.  Since no sortedness testing is done, 
-there can be no guarantees as to what will happen if an unsorted list is 
+A Binary Search consumes O(log n) time.  It would, therefore, be foolish
+for these algorithms to pre-check the list for sortedness, as that would
+require linear, or O(n) time.  Since no sortedness testing is done,
+there can be no guarantees as to what will happen if an unsorted list is
 passed to a binary search.
 
-=item * Data that is more complex than simple numeric or string lists 
-will require a custom comparator or transform subroutine.  This includes 
+=item * Data that is more complex than simple numeric or string lists
+will require a custom comparator or transform subroutine.  This includes
 search keys that are buried within data structures.
 
-=item * These functions are prototyped, either as (&$\@), or as ($\@).  
-What this implementation detail means is that C<@haystack> is implicitly 
-and invisibly passed by reference.  Thus, bare lists will not work.  
-This downside of prototypes is an unfortunate side effect of specifying 
-an API thatclosely matches the one commonly used with List::Util and 
-List::MoreUtils functions.  It can contribute to surprise when the user 
-tries to pass a bare list.  The upside is a more familiar user 
+=item * These functions are prototyped, either as (&$\@), or as ($\@).
+What this implementation detail means is that C<@haystack> is implicitly
+and invisibly passed by reference.  Thus, bare lists will not work.
+This downside of prototypes is an unfortunate side effect of specifying
+an API thatclosely matches the one commonly used with List::Util and
+List::MoreUtils functions.  It can contribute to surprise when the user
+tries to pass a bare list.  The upside is a more familiar user
 interface, and the efficiency of pass-by-ref.
 
 
