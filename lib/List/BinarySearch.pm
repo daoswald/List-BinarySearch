@@ -468,6 +468,53 @@ by specifying C<:all>.
 
 =head1 SUBROUTINES/METHODS
 
+=head2 WHICH SEARCH ROUTINE TO USE
+
+A binary search is supposed to be fast and efficient.  And it's such a good
+algorithm that in profiling this module it was observed that excessive logic
+paths and internal subroutine calls lead quickly to consuming more cycles
+than the algorithm itself for just about any data set that will fit into
+memory.  In the interest of keeping user interfaces as simple as possible, as
+well as limiting the overhead of complex decision paths and internal
+subroutine calls, this module presents a number of similar functions with
+subtle differences between them.  Here's a quick reference to which to choose:
+
+=over 4
+
+=item * C<bsearch_str>: Stringwise comparisons. Returns index or undef.
+
+=item * C<bsearch_str_pos>: Stringwise comparisons.  Returns index or index
+of insert point for needle.
+
+=item * C<bsearch_num>: Numeric comparisons.  Returns index or undef.
+
+=item * C<bsearch_num_pos>: Numeric comparisons.  Returns index or index of
+insert point for needle.
+
+=item * C<bsearch_general>: Auto-select stringwise or numeric comparisons
+based on the needle's type.  Returns index or undef.
+
+=item * C<bsearch_custom>: Comparisons provided by user-defined callback.
+Returns index or undef.
+
+=item * C<bsearch_transform>: Transformations of list elements provided by
+user-defined callback.  Returns index or undef.
+
+=item * C<bsearch_str_range>: Stringwise comparisons for low and high needles.
+Returns a pair of indices refering to a range of elements corresponding to
+low and high needles.
+
+=item * C<bsearch_num_range>: Numeric comparisons for low and high needles.
+Returns a pair of indices referring to a range of elements corresponding to
+low and high needles.
+
+=item * C<bsearch_general_range>: Auto-select comparison type.  Returns a pair
+of indices referring to a range of elements corresponding to low and high
+needles.
+
+=back
+
+
 =head2 SUBROUTINE CATEGORIES
 
 There are three categories of subroutines.  Those that return undef (or an
@@ -770,7 +817,7 @@ makes sense if there are other good reasons for keeping the data set
 sorted in the first place.
 
 B<Passing an unsorted list to these Binary Search algorithms will result
-in undefined behavior.  There is validity checking.>
+in undefined behavior.  There is no validity checking.>
 
 A Binary Search consumes O(log n) time.  It would, therefore, be foolish
 for these algorithms to pre-check the list for sortedness, as that would
@@ -878,12 +925,12 @@ L<http://search.cpan.org/dist/List-BinarySearch/>
 
 =head1 ACKNOWLEDGEMENTS
 
-Thank-you to L<http://search.cpan.org/~corion/|Max Maischein> (Corion) for
+Thank-you to L<Max Maischein|http://search.cpan.org/~corion/> (Corion) for
 being a willing and helpful sounding board on API issues, and for spotting
 some POD problems.
 
-L<http://shop.oreilly.com/product/9781565923980.do|Mastering Algorithms with Perl>,
-from L<http://www.oreilly.com|O'Reilly>: for the inspiration (and much of the
+L<Mastering Algorithms with Perl|http://shop.oreilly.com/product/9781565923980.do>,
+from L<O'Reilly|http://www.oreilly.com>: for the inspiration (and much of the
 code) behind the positional and ranged searches.  Quoting MAwP: "I<...the
 binary search was first documented in 1946 but the first algorithm that worked
 for all sizes of array was not published until 1962.>" (A summary of a passage
