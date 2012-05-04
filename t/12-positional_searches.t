@@ -73,18 +73,30 @@ subtest
         done_testing();
 };
 
-subtest "Test range function." => sub {
-    plan tests => 6;
+subtest "Test range functions." => sub {
+    plan tests => 12;
     my( $low, $high );
     ( $low, $high ) = bsearch_general_range( 'ape', 'bear', @strings );
     is( $low,  0, "bsearch_general_range: Found low  at 0." );
     is( $high, 2, "bsearch_general_range: Found high at 2." );
+    ( $low, $high ) = bsearch_str_range( 'ape', 'bear', @strings );
+    is( $low,  0, "bsearch_str_range: Found low  at 0." );
+    is( $high, 2, "bsearch_str_range: Found high at 2." );
+
     ( $low, $high ) = bsearch_general_range( 'bear', 'zebra', @strings );
     is( $low,  2, "bsearch_general_range: Found low  at 2." );
     is( $high, 4, "bsearch_general_range: Includes high of 4 (not found)." );
+    ( $low, $high ) = bsearch_str_range( 'bear', 'zebra', @strings );
+    is( $low,  2, "bsearch_str_range: Found low  at 2." );
+    is( $high, 4, "bsearch_str_range: Includes high of 4 (not found)." );
+
+
     ( $low, $high ) = bsearch_general_range( 100, 300, @integers );
     is( $low,  0, "bsearch_general_range: Numeric low."  );
     is( $high, 2, "bsearch_general_range: Numeric high." );
+    ( $low, $high ) = bsearch_num_range( 100, 300, @integers );
+    is( $low,  0, "bsearch_num_range: Numeric low."  );
+    is( $high, 2, "bsearch_num_range: Numeric high." );
     done_testing();
 };
 
