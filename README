@@ -2,8 +2,7 @@ List-BinarySearch
 
 Perform a binary search on a flat list or an array passed by reference.
 
-v0.06 is a stable release.  It adds five new functions.  See the POD and
-CHANGES for details.
+v0.07 adds the bsearch_custom_pos function.
 
 
 INSTALLATION

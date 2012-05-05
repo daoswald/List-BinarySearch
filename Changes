@@ -1,5 +1,20 @@
 Revision history for List-BinarySearch
 
+0.07        05-05-2012 12:56am PDT
+    - STATUS
+        - Stable.
+    - API CHANGES:
+        - Added bsearch_custom_pos function.
+        - Removed bsearch_general, and bsearch_general_range.  They were
+          redundant, and prone to user-error.
+    - USER ENHANCEMENTS:
+        - POD improvement: Added a quick reference to aid in selecting the
+          most appropriate search function from the several choices.
+        - Added bsearch_custom_pos.
+        - Removed confusing and redundant _general functions.
+    - OTHER ENHANCEMENTS:
+        - Improved testing on the _pos and _range functions.
+
 0.06        05-04-2012 03:22pm PDT
     - STATUS
         - Stable.
@@ -13,6 +28,8 @@ Revision history for List-BinarySearch
             bsearch_num_range - Return a range.
             bsearch_general_range - Given a pair of targets returns a range
                                     of element indices between (inclusive).
+        - The _general functions are deprecated and will be removed from next
+          release.
     - USER ENHANCEMENTS:
         - Five new functions: See above.
     - OTHER ENHANCEMENTS:

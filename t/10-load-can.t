@@ -18,8 +18,9 @@ diag( "Testing List::BinarySearch " .
 can_ok(
     'List::BinarySearch',
     qw(
-        bsearch_str         bsearch_num
-        bsearch_custom      bsearch_general
+        bsearch_str         bsearch_str_pos     bsearch_str_range
+        bsearch_num         bsearch_num_pos     bsearch_num_range
+        bsearch_custom      bsearch_custom_pos
         bsearch_transform
     )
 );

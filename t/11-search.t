@@ -19,7 +19,7 @@ my @data_structs = (
 );
 
 subtest "Numeric comparator tests (odd-length list)." => sub {
-    plan tests => 20;
+    plan tests => 15;
     for my $ix ( 0 .. $#integers ) {
         is( bsearch_num( $integers[$ix], @integers ),
             $ix,
@@ -34,11 +34,6 @@ subtest "Numeric comparator tests (odd-length list)." => sub {
             "bsearch_custom:           Integer ($integers[$ix]) "
                 . "found in position ($ix)."
         );
-        is( bsearch_general( $integers[$ix], @integers ),
-            $ix,
-            "bsearch_general:               Integer ($integers[$ix]) "
-                . "found in position ($ix)."
-        );
         is( bsearch_transform( sub { $_[0] }, $integers[$ix], @integers ),
             $ix,
             "bsearch_transform: Integer ($integers[$ix]) "
@@ -49,7 +44,7 @@ subtest "Numeric comparator tests (odd-length list)." => sub {
 };
 
 subtest "Even length list tests." => sub {
-    plan tests => 24;
+    plan tests => 16;
     for my $ix ( 0 .. $#even_length ) {
         is( bsearch_custom(
                 sub { $_[0] <=> $_[1] },
@@ -57,11 +52,6 @@ subtest "Even length list tests." => sub {
             ),
             $ix,
             "bsearch_custom:           Even-list: ($even_length[$ix])"
-                . " found at index ($ix)."
-        );
-        is( bsearch_general( $even_length[$ix], @even_length ),
-            $ix,
-            "bsearch_general:               Even-list: ($even_length[$ix])"
                 . " found at index ($ix)."
         );
         is( bsearch_transform(
@@ -78,11 +68,6 @@ subtest "Even length list tests." => sub {
         "bsearch_custom:           undef returned in scalar "
             . "context if no numeric match."
     );
-    is( bsearch_general( 700, @even_length ),
-        undef,
-        "bsearch_general:               undef returned in scalar "
-            . "context if no numeric match."
-    );
     is( bsearch_transform( sub { $_[0] }, 700, @even_length ),
         undef,
         "bsearch_transform: undef returned in scalar "
@@ -94,12 +79,6 @@ subtest "Even length list tests." => sub {
         "bsearch_custom:           Empty list returned in list context "
             . "if no numeric match."
     );
-    @array = bsearch_general( 350, @even_length );
-    is( scalar @array,
-        0,
-        "bsearch_general:               Empty list returned in list context "
-            . "if no numeric match."
-    );
     @array = bsearch_transform( sub { $_[0] }, 350, @even_length );
     is( scalar(@array), 0,
               "bsearch_transform: Empty list returned in list contect "
@@ -108,24 +87,16 @@ subtest "Even length list tests." => sub {
 };
 
 subtest "Non-unique key tests (stable search guarantee)." => sub {
-    plan tests => 9;
+    plan tests => 6;
     is( bsearch_custom( sub { $_[0] <=> $_[1] }, 200, @non_unique ),
         1,
         "bsearch_custom:           First non-unique key of 200 found at 1." );
-    is( bsearch_general( 200, @non_unique ),
-        1,
-        "bsearch_general:          First non-unique key of 200 found at 1." );
     is( bsearch_transform( sub { $_[0] }, 200, @non_unique ),
         1, "bsearch_transform: First non-unique key of 200 found at 1." );
     is( bsearch_custom( sub { $_[0] <=> $_[1] }, 400, @non_unique ),
         3,
         "bsearch_custom:           First occurrence of 400 found at 3 "
             . "(odd index)."
-    );
-    is( bsearch_general( 400, @non_unique ),
-        3,
-        "bsearch_general:               First occurrence of 400 found at 3 "
-            . " (odd index)."
     );
     is( bsearch_transform( sub { $_[0] }, 400, @non_unique ),
         3,
@@ -138,11 +109,6 @@ subtest "Non-unique key tests (stable search guarantee)." => sub {
         "bsearch_custom:           First occurrence of 500 found at 6 "
             . "(even index)."
     );
-    is( bsearch_general( 500, @non_unique ),
-        6,
-        "bsearch_general:               First occurrence of 500 found at 6 "
-            . "(even index)."
-    );
     is( bsearch_transform( sub { $_[0] }, 500, @non_unique ),
         6,
         "bsearch_transform: First occurrence of 500 found at 6 "
@@ -153,7 +119,7 @@ subtest "Non-unique key tests (stable search guarantee)." => sub {
 };
 
 subtest "String default comparator tests." => sub {
-    plan tests => 24;
+    plan tests => 18;
     for my $ix ( 0 .. $#strings ) {
         is( bsearch_str( $strings[$ix], @strings ),
             $ix,
@@ -165,11 +131,6 @@ subtest "String default comparator tests." => sub {
             ),
             $ix,
             "bsearch_custom:           "
-                . "Strings: ($strings[$ix]) found at index ($ix)."
-        );
-        is( bsearch_general( $strings[$ix], @strings ),
-            $ix,
-            "bsearch_general:               "
                 . "Strings: ($strings[$ix]) found at index ($ix)."
         );
         is( bsearch_transform( sub { $_[0] }, $strings[$ix], @strings ),
@@ -186,11 +147,6 @@ subtest "String default comparator tests." => sub {
     is( bsearch_custom( sub { $_[0] cmp $_[1] }, 'dave', @strings ),
         undef,
         "bsearch_custom:           undef returned in scalar "
-            . "context for no string match."
-    );
-    is( bsearch_general( 'dave', @strings ),
-        undef,
-        "bsearch_general:               undef returned in scalar "
             . "context for no string match."
     );
     is( bsearch_transform( sub { $_[0] }, 'dave', @strings ),
