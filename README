@@ -2,7 +2,8 @@ List-BinarySearch
 
 Perform a binary search on a flat list or an array passed by reference.
 
-v0.07 adds the bsearch_custom_pos function.
+v0.08 is a stable release targeting improvements in Makefile.PL, Perl::Critic
+compliance, and Kwalitee compliance.  No end-user changes from v0.07.
 
 
 INSTALLATION
@@ -17,7 +18,7 @@ To install this module, run the following commands:
 DEPENDENCIES
 
 There are no non-core dependencies.
-This module has not been tested on Perl versions older than 5.6.0.
+This module a minimum Perl version of 5.6.0.
 
 SUPPORT AND DOCUMENTATION
 

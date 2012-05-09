@@ -1,23 +1,29 @@
-use 5.006;
+## no critic (RCS,VERSION)
+
 use strict;
 use warnings;
+
 use ExtUtils::MakeMaker;
 
+## no critic (may require interpolation)
 WriteMakefile(
-    NAME                => 'List::BinarySearch',
-    AUTHOR              => q{David Oswald <davido@cpan.org>},
-    VERSION_FROM        => 'lib/List/BinarySearch.pm',
-    ABSTRACT_FROM       => 'lib/List/BinarySearch.pm',
-    ($ExtUtils::MakeMaker::VERSION >= 6.3002
-      ? ('LICENSE'=> 'perl')
-      : ()),
-    PL_FILES            => {},
-    BUILD_REQUIRES		=> {
-		'Test::More' => '0.98',
-	},
-    PREREQ_PM => {
-        'Scalar::Util' => 0,
+    NAME               => 'List::BinarySearch',
+    AUTHOR             => q{David Oswald <davido [@at] cpan [d.o.t] org>},
+    VERSION_FROM       => 'lib/List/BinarySearch.pm',
+    ABSTRACT_FROM      => 'lib/List/BinarySearch.pm',
+    LICENSE            => 'perl',
+    MIN_PERL_VERSION   => '5.006000',
+    PL_FILES           => {},
+    CONFIGURE_REQUIRES => {
+        'ExtUtils::MakeMaker' => '6.62',    # Core, but updated version.
     },
-    dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'List-BinarySearch-*' },
+    BUILD_REQUIRES => {
+        'Test::More' => '0.98',             # Core, but updated version.
+        'English'    => '0',                # Core.
+    },
+    PREREQ_PM => {
+        'Scalar::Util' => '0',              # Core: Being explicit.
+    },
+    dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    clean => { FILES    => 'List-BinarySearch-*' },
 );
