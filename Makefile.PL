@@ -24,6 +24,14 @@ WriteMakefile(
     PREREQ_PM => {
         'Scalar::Util' => '0',              # Core: Being explicit.
     },
+    META_MERGE => {
+        provides => {
+            'List::BinarySearch' => {
+                file    => 'lib/List/BinarySearch.pm',
+                version => '0.08'
+            },
+        },
+    },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES    => 'List-BinarySearch-*' },
 );

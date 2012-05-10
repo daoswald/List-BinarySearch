@@ -38,6 +38,12 @@
          }
       }
    },
+   "provides" : {
+      "List::BinarySearch" : {
+         "file" : "lib/List/BinarySearch.pm",
+         "version" : "0.08"
+      }
+   },
    "release_status" : "stable",
    "version" : "0.08"
 }

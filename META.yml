@@ -18,6 +18,10 @@ no_index:
   directory:
     - t
     - inc
+provides:
+  List::BinarySearch:
+    file: lib/List/BinarySearch.pm
+    version: 0.08
 requires:
   Scalar::Util: 0
   perl: 5.006000
