@@ -2,6 +2,7 @@
 
 package List::BinarySearch;
 
+use 5.006000;
 use strict;
 use warnings;
 
@@ -9,9 +10,8 @@ use Scalar::Util qw( looks_like_number );
 
 require Exporter;
 
-# Perl::Critic advises to 'use base'.  The documentation for 'base' suggests
-# using 'parent'.  'parent' would exclude older Perls.  So we'll avoid the
-# issue by just using @ISA, as advised in the Exporter POD.
+# There is much debate on whether to use base, parent, or manipulate @ISA.
+# The lowest common denominator is what belongs in modules, we'll do @ISA.
 
 our @ISA       = qw(Exporter);    ## no critic (ISA)
 our @EXPORT_OK = qw(
@@ -22,13 +22,12 @@ our @EXPORT_OK = qw(
 );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
-# I debated whether or not to use prototypes, decided that List::Util and
-# List::MoreUtils set the interface standard for these sorts of functions.
-# It seemed best to use a familiar interface.
+# The prototyping gives List::BinarySearch a similar feel to List::Util,
+# and List::MoreUtils.
 
 ## no critic (prototypes)
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
@@ -231,10 +230,7 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.08
-
-New function: bsearch_custom_pos.
-
+Version 0.09
 
 =head1 SYNOPSIS
 
@@ -258,7 +254,7 @@ Examples:
 
 
     # Find the first index of element containing the number 300.
-    
+
     $index = bsearch_num       300, @num_array;
     $index = bsearch_custom    { $_[0] <=> $_[1] } 300, @num_array;
     $index = bsearch_transform { $_[0]           } 300, @num_array;

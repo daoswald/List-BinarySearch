@@ -1,8 +1,8 @@
 #!/usr/bin/env perl
 
-use 5.006;
 use strict;
 use warnings;
+use Carp;
 use Test::More tests => 3;
 
 sub not_in_file_ok {
@@ -12,7 +12,7 @@ sub not_in_file_ok {
 
     ## no critic (RequireBriefOpen)
     open  my $fh, '<', $filename
-        or die "couldn't open $filename for reading: $!";
+        or croak "couldn't open $filename for reading: $!";
 
     while (my $line = <$fh>) {
         while (my ($desc, $regex) = each %regex) {
@@ -34,6 +34,7 @@ sub not_in_file_ok {
 
 sub module_boilerplate_ok {
     my ($module) = @_;
+    ## no critic(regular expression)
     not_in_file_ok($module =>
         'the great new $MODULENAME'   => qr/ - The great new /,
         'boilerplate description'     => qr/Quick summary of what the module/,
@@ -48,7 +49,7 @@ not_in_file_ok(README =>
 );
 
 not_in_file_ok(Changes =>
-"placeholder date/time"       => qr(Date/time)
+"placeholder date/time"       => qr(Date/time)  ## no critic(regular expression)
 );
 
 module_boilerplate_ok('lib/List/BinarySearch.pm');

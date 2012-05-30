@@ -22,7 +22,7 @@ if ( not $ENV{RELEASE_TESTING} ) {
 # We also don't want to force a dependency on Test::Perl::Critic, so if the
 # user doesn't have the module, we won't run the test.
 
-eval { require Test::Perl::Critic; };
+eval { require Test::Perl::Critic; }; ## no critic (eval)
 
 if ( $EVAL_ERROR ) {
     my $msg = 'Author Test: Test::Perl::Critic required to criticise code.';
