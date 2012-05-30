@@ -2,7 +2,7 @@ List-BinarySearch
 
 Perform a binary search on a flat list or an array passed by reference.
 
-v0.07 adds the bsearch_custom_pos function.
+v0.08 adds the bsearch_custom_pos function.
 
 
 INSTALLATION

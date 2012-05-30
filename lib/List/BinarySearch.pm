@@ -28,16 +28,14 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 ## no critic (prototypes)
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
 
-
 # There is a lot of repetition in the code.  This is an intentional means of
 # favoring a small amount of computational efficiency over concise code by
 # avoiding unnecessary function call overhead.
-
 
 # Search using stringwise comparisons.  Return an index on success, undef or
 # an empty list (depending on context) upon failure.
@@ -62,7 +60,6 @@ sub bsearch_str ($\@) {
     return;
 }
 
-
 # Search using numeric comparisons.
 
 sub bsearch_num ($\@) {
@@ -82,8 +79,6 @@ sub bsearch_num ($\@) {
       if $max == $min && $target == $aref->[$min];
     return;    # Undef in scalar context, empty list in list context.
 }
-
-
 
 # Use a callback for comparisons.
 
@@ -106,7 +101,6 @@ sub bsearch_custom (&$\@) {
 
     return;    # Undef in scalar context, empty list in list context.
 }
-
 
 # Use a callback to transform the list elements before comparing.  Comparisons
 # will be stringwise or numeric depending on what target looks like.
@@ -145,8 +139,6 @@ sub bsearch_transform (&$\@) {
     return;    # Undef in scalar context, empty list in list context.
 }
 
-
-
 # Virtually identical to bsearch_str, but upon match-failure returns best
 # insert position for $target.
 
@@ -166,7 +158,6 @@ sub bsearch_str_pos ($\@) {
     return $low;
 }
 
-
 # Identical to bsearch_num, but upon match-failure returns best insert
 # position for $target.
 
@@ -185,16 +176,15 @@ sub bsearch_num_pos ($\@) {
     return $low;
 }
 
-
 # Identical to bsearch_custom, but upon match-failure returns best insert
 # position for $target.
 
 sub bsearch_custom_pos (&$\@) {
     my ( $comp, $target, $aref ) = @_;
-    my ( $low,    $high ) = ( 0, scalar @{$aref} );
+    my ( $low, $high ) = ( 0, scalar @{$aref} );
     while ( $low < $high ) {
         my $cur = int( ( $low + $high ) / 2 );
-        if( $comp->( $target, $aref->[$cur] ) > 0 ) {
+        if ( $comp->( $target, $aref->[$cur] ) > 0 ) {
             $low = $cur + 1;
         }
         else {
@@ -204,7 +194,6 @@ sub bsearch_custom_pos (&$\@) {
     return $low;
 }
 
-
 # Given a low and a high target, returns a range of indices representing
 # where low and high fit into @haystack.
 
@@ -212,7 +201,7 @@ sub bsearch_str_range ($$\@) {
     my ( $low_target, $high_target, $aref ) = @_;
     my $index_low  = bsearch_str_pos( $low_target,  @{$aref} );
     my $index_high = bsearch_str_pos( $high_target, @{$aref} );
-    if (   $index_high == @{$aref}
+    if (   $index_high == scalar @{$aref}
         or $aref->[$index_high] gt $high_target )
     {
         $index_high--;
@@ -220,20 +209,17 @@ sub bsearch_str_range ($$\@) {
     return ( $index_low, $index_high );
 }
 
-
-
 sub bsearch_num_range ($$\@) {
     my ( $low_target, $high_target, $aref ) = @_;
     my $index_low  = bsearch_num_pos( $low_target,  @{$aref} );
     my $index_high = bsearch_num_pos( $high_target, @{$aref} );
-    if (   $index_high == @{$aref}
+    if (   $index_high == scalar @{$aref}
         or $aref->[$index_high] > $high_target )
     {
         $index_high--;
     }
     return ( $index_low, $index_high );
 }
-
 
 1;    # End of List::BinarySearch
 
@@ -245,7 +231,7 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 New function: bsearch_custom_pos.
 
