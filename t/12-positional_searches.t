@@ -85,7 +85,7 @@ subtest
 };
 
 subtest "Test range functions." => sub {
-    plan tests => 6;
+    plan tests => 8;
     my( $low, $high );
     ( $low, $high ) = bsearch_str_range( 'ape', 'bear', @strings );
     is( $low,  0, "bsearch_str_range: Found low  at 0." );
@@ -98,6 +98,11 @@ subtest "Test range functions." => sub {
     ( $low, $high ) = bsearch_num_range( 100, 300, @integers );
     is( $low,  0, "bsearch_num_range: Numeric low."  );
     is( $high, 2, "bsearch_num_range: Numeric high." );
+    ( $low, $high ) = bsearch_custom_range( 
+		sub { $_[0] cmp $_[1] }, 'ape', 'bear', @strings );
+	is( $low,  0, "bsearch_custom_range: Found low at 0." );
+	is( $high, 2, "bsearch_custom_range: Found high at 2." );
+	
     done_testing();
 };
 

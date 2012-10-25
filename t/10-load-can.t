@@ -20,7 +20,7 @@ can_ok(
     qw(
         bsearch_str         bsearch_str_pos     bsearch_str_range
         bsearch_num         bsearch_num_pos     bsearch_num_range
-        bsearch_custom      bsearch_custom_pos
+        bsearch_custom      bsearch_custom_pos  bsearch_custom_range
         bsearch_transform
     )
 );

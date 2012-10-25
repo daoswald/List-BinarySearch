@@ -17,7 +17,7 @@ our @ISA       = qw(Exporter);    ## no critic (ISA)
 our @EXPORT_OK = qw(
   bsearch_str       bsearch_str_pos     bsearch_str_range
   bsearch_num       bsearch_num_pos     bsearch_num_range
-  bsearch_custom    bsearch_custom_pos
+  bsearch_custom    bsearch_custom_pos  bsearch_custom_range
   bsearch_transform
 );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
@@ -27,7 +27,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 ## no critic (prototypes)
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
@@ -208,6 +208,19 @@ sub bsearch_str_range ($$\@) {
     return ( $index_low, $index_high );
 }
 
+sub bsearch_custom_range (&$$\@) {
+	my( $code, $low_target, $high_target, $aref ) = @_;
+	my $index_low  = bsearch_custom_pos( \&$code, $low_target,  @$aref );
+	my $index_high = bsearch_custom_pos( \&$code, $high_target, @$aref );
+	if(    $index_high == scalar @$aref
+	    or $code->( $aref->[$index_high], $high_target ) > 0 )
+	{
+		$index_high--;
+	}
+	return ( $index_low, $index_high );
+}
+
+
 sub bsearch_num_range ($$\@) {
     my ( $low_target, $high_target, $aref ) = @_;
     my $index_low  = bsearch_num_pos( $low_target,  @{$aref} );
@@ -244,7 +257,7 @@ Examples:
     use List::BinarySearch qw(
         bsearch_str         bsearch_str_pos         bsearch_str_range
         bsearch_num         bsearch_num_pos         bsearch_num_range
-        bsearch_custom
+        bsearch_custom      bsearch_custom_pos      bsearch_custom_range
         bsearch_transform
     );
 
@@ -436,6 +449,10 @@ low and high needles.
 Returns a pair of indices referring to a range of elements corresponding to
 low and high needles.
 
+=item * C<bsearch_custom_range>: Custom (callback-based) comparisons for
+low and high needles.  Returns a pair of indices referring to a range of
+elements corresponding to low and high needles.
+
 =back
 
 
@@ -501,7 +518,8 @@ hand side of the comparison must refer to the C<$_[1]...>, where C<...> is
 the portion of the data structure to be used in the comparison: C<$_[1][$n]>,
 or C<$_[1]{$k}>, for example.
 
-
+C<bsearch_custom>, along with the other custom search functions are good
+choices when lists are sorted according to a Unicode collation.
 
 =head2 bsearch_transform CODE NEEDLE ARRAY_HAYSTACK
 
@@ -606,7 +624,8 @@ hand side of the comparison must refer to the C<$_[1]...>, where C<...> is
 the portion of the data structure to be used in the comparison: C<$_[1][$n]>,
 or C<$_[1]{$k}>, for example.
 
-
+As mentioned before the "custom" search functions are well suited to
+searching within lists that are sorted in a Unicode Collation order.
 
 =head2 bsearch_str_range LOW_STRING_NEEDLE HIGH_STRING_NEEDLE ARRAY_HAYSTACK
 
@@ -622,7 +641,11 @@ Here's an example:
     my( $low, $high ) = bsearch_num_range 200, 400, @haystack;
     my @found = @haystack[ $low .. $high ]; # @found holds ( 200, 300, 400 ).
 
+=head2 bsearch_custom_range CODE LOW_NEEDLE HIGH_NEEDLE ARRAY_HAYSTACK
 
+Works as the previous two searches, except the first parameter should be
+a code block or reference that provides the comparison.  This is well
+suited to complex data, or data sorted according to a Unicode Collation.
 
 =head2 \&comparator
 
@@ -649,6 +672,13 @@ Basic comparators might be defined like this:
         my( $needle, $haystack_item ) = @_;
         return $needle cmp $haystack_item;
     };
+
+    # Unicode Collation Algorithm comparisons;
+    $Collator = Unicode::Collate->new;
+    $comp = sub {
+		my( $needle, $haystack_item ) = @_;
+		return $Collator->( $needle, $haystack_item );
+	};
 
 The first parameter passed to the comparator will be the target.  The second
 parameter will be the contents of the element being tested.  This leads to
@@ -749,7 +779,8 @@ passed to a binary search.
 
 =item * Data that is more complex than simple numeric or string lists
 will require a custom comparator or transform subroutine.  This includes
-search keys that are buried within data structures.
+search keys that are buried within data structures, and strings sorted
+using a Unicode Collation Algorithm.
 
 =item * These functions are prototyped, either as (&$\@), or as ($\@).
 What this implementation detail means is that C<@haystack> is implicitly
@@ -762,7 +793,14 @@ interface, and the efficiency of pass-by-ref.
 
 =back
 
+=head1 UNICODE SUPPORT
 
+All of the stringwise searches use Perl's native C<cmp> operator for
+comparisons.  This is fine for lists that are naively sorted based on
+Perl's standard C<sort>.  But for lists sorted according to the Unicode
+Collation Algorithm, use the "custom" searches: 
+C<bsearch_custom> or C<bsearch_custom_pos>, preferably with 
+L<Unicode::Collate>'s C<< $Collator->cmp($a, $b) >> syntax.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 

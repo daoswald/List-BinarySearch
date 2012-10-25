@@ -1,5 +1,17 @@
 Revision history for List-BinarySearch
 
+0.10        10-25-2012 00:28 PDT
+    - STATUS
+        - Stable.
+    - API CHANGES
+        - Added bsearch_custom_range function.
+	- USER ENHANCEMENTS
+        - Added explanation and example to POD on how to handle lists 
+          sorted according to the Unicode Collation Algorithm 
+          (Unicode::Collate).
+    - OTHER ENHANCEMENTS
+        - Added tests for bsearch_custom_range.
+      
 0.09        05-30-2012 08:33am PDT
     - OTHER ENHANCEMENTS
         - BinarySearch.pm is now B::Lint friendly.

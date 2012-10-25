@@ -2,7 +2,8 @@ List-BinarySearch
 
 Perform a binary search on a flat list or an array passed by reference.
 
-v0.09 is now B::Lint friendly.
+v0.10 adds bsearch_custom_range function, and POD description of 
+Unicode support.
 
 INSTALLATION
 
