@@ -1,174 +1,121 @@
-Revision history for List-BinarySearch
+Revision history for List::BinarySearch
 
-0.10        10-25-2012 00:28 PDT
-    - STATUS
-        - Stable.
-    - API CHANGES
-        - Added bsearch_custom_range function.
-	- USER ENHANCEMENTS
-        - Added explanation and example to POD on how to handle lists 
-          sorted according to the Unicode Collation Algorithm 
-          (Unicode::Collate).
-    - OTHER ENHANCEMENTS
-        - Added tests for bsearch_custom_range.
+0.11 2012-11-02
+  - "Changes" now CPAN::Changes::Spec compliant.
+  - t/09-changes.t added to verify spec compliance.
+
+0.10 2012-10-25
+  - API ADDITION: Added bsearch_custom_range function.
+  - Added explanation and example to POD on how to handle lists 
+    sorted according to the Unicode Collation Algorithm 
+    (Unicode::Collate).
+  - Added tests for bsearch_custom_range.
       
-0.09        05-30-2012 08:33am PDT
-    - OTHER ENHANCEMENTS
-        - BinarySearch.pm is now B::Lint friendly.
-        - Added an examples/ directory.
+0.09 2012-05-30
+  - BinarySearch.pm is now B::Lint friendly.
+  - Added an examples/ directory.
 
-0.08        05-09-2012 15:10pm PDT
-    - STATUS
-        - Stable.
-    - API CHANGES:
-        - None.
-    - OTHER ENHANCEMENTS:
-        - Applied improvements to Makefile.PL from lessons learned in other
-          more cranky modules.
-        - Improved Kwalitee for Makefile.PL
-        - Improved minimum Perl version handling (still 5.6.0).
-        - Added t/13-kwalitee.t
-        - Improved Perl::Critic compliance in test suite and Makefile.PL.
-        - Minor bugfixes t/00-boilerplate.t
+0.08 2012-05-09
+  - API IS STABLE.
+  - Applied improvements to Makefile.PL from lessons learned in other
+    more cranky modules.
+  - Improved Kwalitee for Makefile.PL
+  - Improved minimum Perl version handling (still 5.6.0).
+  - Added t/13-kwalitee.t
+  - Improved Perl::Critic compliance in test suite and Makefile.PL.
+  - Minor bugfixes t/00-boilerplate.t
 
-0.07        05-05-2012 12:56am PDT
-    - STATUS
-        - Stable.
-    - API CHANGES:
-        - Added bsearch_custom_pos function.
-        - Removed bsearch_general, and bsearch_general_range.  They were
-          redundant, and prone to user-error.
-    - USER ENHANCEMENTS:
-        - POD improvement: Added a quick reference to aid in selecting the
-          most appropriate search function from the several choices.
-        - Added bsearch_custom_pos.
-        - Removed confusing and redundant _general functions.
-    - OTHER ENHANCEMENTS:
-        - Improved testing on the _pos and _range functions.
+0.07 2012-05-05
+  - API ADDITION: Added bsearch_custom_pos function.
+  - API DELETION: Removed bsearch_general, and bsearch_general_range.
+    They were redundant, and prone to user-error.
+  - POD improvement: Added a quick reference to aid in selecting the
+    most appropriate search function from the several choices.
+  - Added bsearch_custom_pos.
+  - Removed confusing and redundant _general functions.
+  - Improved testing on the _pos and _range functions.
 
-0.06        05-04-2012 03:22pm PDT
-    - STATUS
-        - Stable.
-    - BUG FIXES:
-        - None.
-    - API CHANGES:
-        - Added five functions:
-            bsearch_str_pos - Return value always gives an insert-position.
-            bsearch_num_pos - Return value always gives an insert-position.
-            bsearch_str_range - Return a range.
-            bsearch_num_range - Return a range.
-            bsearch_general_range - Given a pair of targets returns a range
-                                    of element indices between (inclusive).
-        - The _general functions are deprecated and will be removed from next
-          release.
-    - USER ENHANCEMENTS:
-        - Five new functions: See above.
-    - OTHER ENHANCEMENTS:
-        - Tests added for five new functions.
+0.06 2012-05-04
+  - API CHANGES -- SEE BELOW.
+  - Added five functions:
+      bsearch_str_pos - Return value always gives an insert-position.
+      bsearch_num_pos - Return value always gives an insert-position.
+      bsearch_str_range - Return a range.
+      bsearch_num_range - Return a range.
+      bsearch_general_range - Given a pair of targets returns a range
+                              of element indices between (inclusive).
+  - The _general functions are deprecated and will be removed from next
+    release.
+  - Tests added for five new functions.
 
-0.05        05-01-2012 11:33pm PDT
-    - STATUS:
-        - Stable.
-    - BUG FIXES:
-        - POD corrections
-            - Example code.
-            - Spelling.
+0.05 2012-05-01
+  - POD corrections
+  - POD Example code.
+  - POD Spelling.
 
-0.04        04-30-2012 9:11am PDT
-    - STATUS:
-        - Stable.
-    -BUG FIXES:
-        - POD corrections (Thanks to Corion).
 
-0.03        04-30-2012 01:50am PDT
-    - STATUS:
-        - Stable.
-    - BUG FIXES:
-        - POD corrections.
+0.04 2012-04-30
+  - POD corrections (Thanks to Corion).
 
-0.02        04-30-2012 01:21am PDT
-    - STATUS:
-        - Stable release.  API may only break compatibility after a
-          deprecation cycle.
-    - API CHANGES:
-        - bsearch_arrayref gets prototypes and becomes bsearch_str,
-          and bsearch_num.
-        - bsearch_transform_arrayref becomes bsearch_transform.
-        - bsearch_custom is born.
-        - bsearch_list is gone.
-        - All functions now have prototypes to gain the familiar
-          user-interface of List::Util and List::MoreUtils.
-    - BUG FIXES:
-        - A few POD typos fixed.
-    - USER ENHANCEMENTS:
-        - See API CHANGES.
-        - Many POD changes to clarify text and simplify examples.
-    - ADDITIONAL CODE ENHANCEMENTS:
-        - Several logic paths were unrolled to eliminate costly subroutine
-          calls inside of tight loops.
 
-0.01_005    04-28-2012 10:43pm PDT
-    - STATUS:
-        - Beta testing.  API may change.
-        - Developer's release.
-        - Breaks compatibility with previous API.
-    - API CHANGES:
-        - Order of args for bsearch_arrayref and bsearch_transform_arrayref
-          rearranged to match bsearch_list.
-    - BUG FIXES:
-        - Fixed a few POD formatting issues.
-        - Changed Test::More dependency from '0' to '0.98' to assure a version
-          of subtest() that doesn't fail under Perl 5.10.0.
-    - USER ENHANCEMENTS:
-        - POD changes to reflect updated API.
-    - ADDITIONAL CODE ENHANCEMENTS:
-        - Test t/11-search.t modified to support API changes.
-        - Reworded a few portions of the POD for (hopefully) better clarity.
+0.03 2012-04-30
+  - POD corrections.
 
-0.01_004    04-27-2012 01:23am PDT
-    - STATUS
-        - Beta testing.  API may change.
-        - Developer's release.
-        - Breaks compatibility with previous API.
-    - API CHANGES:
-        - Changed bsearch_array() to bsearch_arrayref()
-        - Added bsearch_transform_arrayref(), and supporting POD and tests.
-    - USER ENHANCEMENTS:
-        - See API CHANGES.
-    - ADDITIONAL CODE ENHANCEMENTS:
-        - Added a few more tests to 11-search.t.
+0.02 2012-04-30
+  - Stable release.  API may only break compatibility after a
+    deprecation cycle.
+  - bsearch_arrayref gets prototypes and becomes bsearch_str,
+    and bsearch_num.
+  - bsearch_transform_arrayref becomes bsearch_transform.
+  - bsearch_custom is born.
+  - bsearch_list is gone.
+  - All functions now have prototypes to gain the familiar
+    user-interface of List::Util and List::MoreUtils.
+  - A few POD typos fixed.
+  - Many POD changes to clarify text and simplify examples.
+  - Several logic paths were unrolled to eliminate relatively expensive
+    subroutine calls inside of tight loops.
 
-0.01_003    04-25-2012 09:40am PDT
-    - STATUS:
-        - Beta testing.  API may change.
-        - Developer's release.
-    - API CHANGES:
-        - None.
-    - BUG FIXES:
-        - Removed //= from bsearch_array() to establish backward compatibility
-          with Perl 5.8.0 and older.
-    - USER ENHANCEMENTS:
-        - None.
-    - ADDITIONAL CODE ENHANCEMENTS:
-        - None.
+0.01_005 2012-04-28
+  - Beta testing.  API may change.
+  - Developer's release.
+  - Breaks compatibility with previous API.
+  - Order of args for bsearch_arrayref and bsearch_transform_arrayref
+    rearranged to match bsearch_list.
+  - Fixed a few POD formatting issues.
+  - Changed Test::More dependency from '0' to '0.98' to assure a version
+    of subtest() that doesn't fail under Perl 5.10.0.
+  - POD changes to reflect updated API.
+  - Test t/11-search.t modified to support API changes.
+  - Reworded a few portions of the POD for (hopefully) better clarity.
 
-0.01_002    04-25-2012 01:00am PDT
-    - STATUS:
-        - Beta testing. API may change.
-        - Developer's release.
-    - BUG-FIXES:
-        - Fixed a coderef detection bug in bsearch_list().
-    - USER ENHANCEMENTS:
-        - Many POD revisions.
-    - CODE ENHANCEMENTS:
-        - Completed 11-search.t tests.
-        - Many test suite revisions.
-        - List/BinarySearch.pm is now Perl::Critic level 2 compliant.
-        - Test suite is Perl::Critic level 4 compliant.
+0.01_004 2012-04-27
+  - Beta testing.  API may change.
+  - Developer's release.
+  - Breaks compatibility with previous API.
+  - Changed bsearch_array() to bsearch_arrayref()
+  - Added bsearch_transform_arrayref(), and supporting POD and tests.
+  - See API CHANGES.
+  - Added a few more tests to 11-search.t.
 
-0.01_001    04-23-2012
-    - Beta testing.  API may change.
-    - Developer's release.
-    - Initial release to CPAN.
-    - Unstable -- Seeking smoke test results.
+0.01_003 2012-04-25
+  - Beta testing.  API may change.
+  - Developer's release.
+  - Removed //= from bsearch_array() to establish backward compatibility
+    with Perl 5.8.0 and older.
 
+0.01_002 2012-04-25
+  - Beta testing. API may change.
+  - Developer's release.
+  - Fixed a coderef detection bug in bsearch_list().
+  - Many POD revisions.
+  - Completed 11-search.t tests.
+  - Many test suite revisions.
+  - List/BinarySearch.pm is now Perl::Critic level 2 compliant.
+  - Test suite is Perl::Critic level 4 compliant.
+
+0.01_001 2012-04-23
+  - Beta testing.  API may change.
+  - Developer's release.
+  - Initial release to CPAN.
+  - Unstable -- Seeking smoke test results.

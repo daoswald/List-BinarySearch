@@ -27,7 +27,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 ## no critic (prototypes)
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
@@ -243,7 +243,7 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.09
+Version 0.11
 
 =head1 SYNOPSIS
 
