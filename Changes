@@ -1,5 +1,20 @@
 Revision history for List::BinarySearch
 
+0.11_001 2013-08-20
+  - DEVELOPER'S RELEASE
+  - Deprecated all existing functions under their current names.
+  - Three new functions: binsearch, binsearch_pos, binsearch_range. These
+    replace bsearch_custom, bsearch_custom_pos, and bsearch_custom_range.
+    The others will not be replaced, as they can be created using the more
+    generalized functions.
+  - Major documentation changes.
+  - Announce upcoming List::BinarySearch::XS that when installed will be a
+    silent and automatic performance upgrade.
+  - $a and $b now permitted in place of $_[0] and $_[1].  The old @_ paramater
+    passing has been deprecated.
+  - The next major release, v0.12 will formally deprecate according to
+    the list above.
+
 0.11 2012-11-02
   - "Changes" now CPAN::Changes::Spec compliant.
   - t/09-changes.t added to verify spec compliance.

@@ -15,11 +15,13 @@ require Exporter;
 
 our @ISA       = qw(Exporter);    ## no critic (ISA)
 our @EXPORT_OK = qw(
+  binsearch         binsearch_pos       binsearch_range
   bsearch_str       bsearch_str_pos     bsearch_str_range
   bsearch_num       bsearch_num_pos     bsearch_num_range
   bsearch_custom    bsearch_custom_pos  bsearch_custom_range
   bsearch_transform
 );
+
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
@@ -27,10 +29,10 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 ## no critic (prototypes)
 
-our $VERSION = '0.11';
+our $VERSION = '0.11_001';
 
 # Needed for developer's releases: See perlmodstyle.
-# $VERSION = eval $VERSION;    ## no critic (eval,version)
+$VERSION = eval $VERSION;    ## no critic (eval,version)
 
 # There is a lot of repetition in the code.  This is an intentional means of
 # favoring a small amount of computational efficiency over concise code by
@@ -39,8 +41,10 @@ our $VERSION = '0.11';
 # Search using stringwise comparisons.  Return an index on success, undef or
 # an empty list (depending on context) upon failure.
 
+
+# DEPRECATED -----------------------------------
 sub bsearch_str ($\@) {
-    my ( $target, $aref ) = @_;
+    my( $target, $aref ) = @_;
     my $min = 0;
     my $max = $#{$aref};
     while ( $max > $min ) {
@@ -58,9 +62,10 @@ sub bsearch_str ($\@) {
 
     return;
 }
+#---------------------------------------------
 
 # Search using numeric comparisons.
-
+# DEPRECATED ---------------------------------
 sub bsearch_num ($\@) {
     my ( $target, $aref ) = @_;
     my $min = 0;
@@ -78,15 +83,18 @@ sub bsearch_num ($\@) {
       if $max == $min && $target == $aref->[$min];
     return;    # Undef in scalar context, empty list in list context.
 }
-
+#---------------------------------------------
 # Use a callback for comparisons.
 
-sub bsearch_custom (&$\@) {
+
+sub binsearch (&$\@) {
     my ( $code, $target, $aref ) = @_;
     my $min = 0;
     my $max = $#{$aref};
+    no strict 'refs';
     while ( $max > $min ) {
         my $mid = int( ( $min + $max ) / 2 );
+        local ( ${caller() . '::a'}, ${caller() . '::b'} ) = ( $target, $aref->[$mid] );            # Future use.
         if ( $code->( $target, $aref->[$mid] ) > 0 ) {
             $min = $mid + 1;
         }
@@ -95,15 +103,22 @@ sub bsearch_custom (&$\@) {
         }
     }
 
+    local ( ${caller() . '::a'}, ${caller() . '::b'} ) = ( $target, $aref->[$min] );                # Future use.
     return $min
       if $max == $min && $code->( $target, $aref->[$min] ) == 0;
 
     return;    # Undef in scalar context, empty list in list context.
 }
 
+# DEPRECATED -------------------------------
+sub bsearch_custom(&$\@);
+*bsearch_custom = \&binsearch;
+# ------------------------------------------
+
 # Use a callback to transform the list elements before comparing.  Comparisons
 # will be stringwise or numeric depending on what target looks like.
 
+# DEPRECATED -------------------------------
 sub bsearch_transform (&$\@) {
     my ( $transform_code, $target, $aref ) = @_;
     my ( $min, $max ) = ( 0, $#{$aref} );
@@ -138,9 +153,11 @@ sub bsearch_transform (&$\@) {
     return;    # Undef in scalar context, empty list in list context.
 }
 
+# ----------------------------------------------------
 # Virtually identical to bsearch_str, but upon match-failure returns best
 # insert position for $target.
 
+# DEPRECATED ------------------------------------------
 sub bsearch_str_pos ($\@) {
     my ( $target, $aref ) = @_;
     my ( $low, $high ) = ( 0, scalar @{$aref} );
@@ -156,10 +173,12 @@ sub bsearch_str_pos ($\@) {
     }
     return $low;
 }
+#------------------------------------------------------
 
 # Identical to bsearch_num, but upon match-failure returns best insert
 # position for $target.
 
+# DEPRECATED ------------------------------------------
 sub bsearch_num_pos ($\@) {
     my ( $target, $aref ) = @_;
     my ( $low, $high ) = ( 0, scalar @{$aref} );
@@ -175,14 +194,19 @@ sub bsearch_num_pos ($\@) {
     return $low;
 }
 
+#------------------------------------------------------
+
 # Identical to bsearch_custom, but upon match-failure returns best insert
 # position for $target.
 
-sub bsearch_custom_pos (&$\@) {
+
+sub binsearch_pos (&$\@) {
     my ( $comp, $target, $aref ) = @_;
     my ( $low, $high ) = ( 0, scalar @{$aref} );
     while ( $low < $high ) {
         my $cur = int( ( $low + $high ) / 2 );
+        no strict 'refs';
+        local ( ${ caller() . '::a'}, ${ caller() . '::b'} ) = ( $target, $aref->[$cur] );             # Future use.
         if ( $comp->( $target, $aref->[$cur] ) > 0 ) {
             $low = $cur + 1;
         }
@@ -193,9 +217,15 @@ sub bsearch_custom_pos (&$\@) {
     return $low;
 }
 
+# DEPRECATED --------------------------------------------
+sub bsearch_custom_pos(&$\@);
+*bsearch_custom_pos = \&binsearch_pos;
+#--------------------------------------------------------
+
 # Given a low and a high target, returns a range of indices representing
 # where low and high fit into @haystack.
 
+# DEPRECATED -------------------------------------------
 sub bsearch_str_range ($$\@) {
     my ( $low_target, $high_target, $aref ) = @_;
     my $index_low  = bsearch_str_pos( $low_target,  @{$aref} );
@@ -207,11 +237,14 @@ sub bsearch_str_range ($$\@) {
     }
     return ( $index_low, $index_high );
 }
+# -----------------------------------------------------
 
-sub bsearch_custom_range (&$$\@) {
+sub binsearch_range (&$$\@) {
 	my( $code, $low_target, $high_target, $aref ) = @_;
 	my $index_low  = bsearch_custom_pos( \&$code, $low_target,  @$aref );
 	my $index_high = bsearch_custom_pos( \&$code, $high_target, @$aref );
+  no strict 'refs';
+  local( ${caller() . '::a'}, ${caller() . '::b'} ) = ( $aref->[$index_high], $high_target );        # Future use.
 	if(    $index_high == scalar @$aref
 	    or $code->( $aref->[$index_high], $high_target ) > 0 )
 	{
@@ -220,7 +253,12 @@ sub bsearch_custom_range (&$$\@) {
 	return ( $index_low, $index_high );
 }
 
+# DEPRECATED -------------------------------------------
+sub bsearch_custom_range(&$$\@);
+*bsearch_custom_range = \&binsearch_range;
+# ------------------------------------------------------
 
+# DEPRECATED -------------------------------------------
 sub bsearch_num_range ($$\@) {
     my ( $low_target, $high_target, $aref ) = @_;
     my $index_low  = bsearch_num_pos( $low_target,  @{$aref} );
@@ -233,6 +271,9 @@ sub bsearch_num_range ($$\@) {
     return ( $index_low, $index_high );
 }
 
+# ------------------------------------------------------
+
+
 1;    # End of List::BinarySearch
 
 __END__
@@ -243,7 +284,7 @@ List::BinarySearch - Binary Search a sorted list or array.
 
 =head1 VERSION
 
-Version 0.11
+Version 0.11_001
 
 =head1 SYNOPSIS
 
@@ -255,73 +296,41 @@ Examples:
 
     use List::BinarySearch qw( :all );
     use List::BinarySearch qw(
-        bsearch_str         bsearch_str_pos         bsearch_str_range
-        bsearch_num         bsearch_num_pos         bsearch_num_range
-        bsearch_custom      bsearch_custom_pos      bsearch_custom_range
-        bsearch_transform
+        binsearch           binsearch_pos           binsearch_range
     );
-
 
     my @num_array =   ( 100, 200, 300, 400, 500 );
+    my @str_array = qw( Bach Beethoven Brahms Mozart Schubert );
+
     my $index;
 
+    # binsearch returns the matching element with lowest index.
 
-    # Find the first index of element containing the number 300.
+    $index = binsearch { $a <=> $b } 300, @num_array;
+    $index = binsearch { $a cmp $b } 'Mozart', @str_array;  # Stringy cmp.
 
-    $index = bsearch_num       300, @num_array;
-    $index = bsearch_custom    { $_[0] <=> $_[1] } 300, @num_array;
-    $index = bsearch_transform { $_[0]           } 300, @num_array;
+    # binsearch returns 'undef' if nothing is found:
 
+    $index = binsearch { $a cmp $b } 'Meatloaf', @str_array; # not found: undef
+    $index = binsearch { $a <=> $b } 42,         @num_array; # not found: undef
 
-    my @str_array = qw( Bach Beethoven Brahms Mozart Schubert );
+    # binsearch_pos returns lowest index of matching element, or best insert
+    # point if no match is found.
 
-    # Find the first index of element containing the string 'Mozart'.
+    $index = binsearch_pos { $a cmp $b } 'Chopin', @str_array; # Returns 3 - Best insert-at position.
+    $index = binsearch_pos 600, @num_array; # Returns 5 - Best insert-at position.
+    splice @num_array, $index, 1, 600 if( $num_array[$index] != 600 ); # Safe to insert at $index.
 
-    $index = bsearch_str       'Mozart', @str_array;
-    $index = bsearch_custom    { $_[0] cmp $_[1] } 'Mozart', @str_array;
-    $index = bsearch_transform { $_[0]           } 'Mozart', @str_array;
-
-
-    # All functions return 'undef' if nothing is found:
-
-    $index = bsearch_str 'Meatloaf', @str_array;    # not found: returns undef
-    $index = bsearch_num 42,         @num_array;    # not found: returns undef
-
-
-    # Complex data structures:
-
-    my @complex = (
-        [ 'one',   1 ],
-        [ 'two',   2 ],
-        [ 'three', 3 ],
-        [ 'four' , 4 ],
-        [ 'five' , 5 ],
-    );
-
-
-    # Find 'one' from the structure above:
-
-    $index = bsearch_custom    { $_[0] cmp $_[1][0] } 'one', @complex;
-    $index = besarch_transform { $_[1][0]           } 'one', @complex;
-
-
-    # The following functions return an optimal insert point if no match.
-
-    my @str_array = qw( Bach Beethoven Brahms Mozart Schubert );
-    my @num_array =   ( 100, 200, 300, 400 );
-
-    $index = bsearch_str_pos 'Chopin', @str_array; # Returns 3 - Best insert-at position.
-    $index = bsearch_num_pos 500, @num_array; # Returns 4 - Best insert-at position.
-
+    $index = binsearch_pos { $a <=> $b } 200, @num_array; # Returns 1; Matching element's index.
 
     # The following functions return an inclusive range.
 
     my( $low_ix, $high_ix )
-        = bsearch_str_range( 'Beethoven', 'Mozart', @str_array );
+        = binsearch_range { $a cmp $b } 'Beethoven', 'Mozart', @str_array;
         # Returns ( 1, 3 ), meaning ( 1 .. 3 ).
 
     my( $low_ix, $high_ix )
-        = bsearch_num_range( 200, 400, @num_array );
+        = binsearch_range { $a <=> $b } 200, 400, @num_array;
 
 
 
@@ -345,7 +354,8 @@ would return the first one found, which may not be the chronological first.
 
 =item * Best and worst case time complexity is always O(log n).  Unstable
 searches may find the target in fewer iterations in the best case, but in the
-worst case would still be O(log n).
+worst case would still be O(log n).  In practical terms, this difference is
+usually not meaningful.
 
 =item * Stable binary searches only require one relational comparison of a
 given pair of data elements per iteration, where unstable binary searches
@@ -384,7 +394,7 @@ or the linear-time conversion to a hash-based container is too inefficient or
 demands too much memory.  So often, it just doesn't make sense to try to
 optimize beyond what Perl's tools natively provide.
 
-However, there are cases where, a binary search may be an excellent choice.
+However, there are cases where a binary search may be an excellent choice.
 Finding the first matching element in a list of 1,000,000 items with a linear
 search would have a worst-case of 1,000,000 iterations, whereas the worst case
 for a binary search of 1,000,000 elements is about 20 iterations.  In fact, if
@@ -399,292 +409,92 @@ finally, optimize.
 
 =head1 EXPORT
 
-Nothing is exported by default.  Upon request will export C<bsearch_str>,
-C<bsearch_num>, C<bsearch_custom>, C<bsearch_transform>,
-C<bsearch_num_pos>, C<bsearch_str_pos>, C<bsearch_custom_pos>,
-C<bsearch_str_range>, and C<bsearch_num_range>.  Or import all functions
-by specifying C<:all>.
+Nothing is exported by default.  Upon request will export C<binsearch>,
+C<binsearch_pos>, and C<binsearch_range>.
 
-
+Or import all functions by specifying C<:all>.
 
 =head1 SUBROUTINES/METHODS
 
 =head2 WHICH SEARCH ROUTINE TO USE
 
-A binary search is supposed to be fast and efficient.  And it's such a good
-algorithm that in profiling this module it was observed that excessive logic
-paths and internal subroutine calls lead quickly to consuming more cycles
-than the algorithm itself for just about any data set that will fit into
-memory.  In the interest of keeping user interfaces as simple as possible, as
-well as limiting the overhead of complex decision paths and internal
-subroutine calls, this module presents a number of similar functions with
-subtle differences between them.  Here's a quick reference to which to choose:
-
 =over 4
 
-=item * C<bsearch_str>: Stringwise comparisons. Returns index or undef.
+=item * C<binsearch>: Returns lowest index where match is found, or undef.
 
-=item * C<bsearch_str_pos>: Stringwise comparisons.  Returns index or index
-of insert point for needle.
+=item * C<binsearch_pos>: Returns lowest index where match is found, or the
+index of the best insert point for needle if the needle isn't found.
 
-=item * C<bsearch_num>: Numeric comparisons.  Returns index or undef.
-
-=item * C<bsearch_num_pos>: Numeric comparisons.  Returns index or index of
-insert point for needle.
-
-=item * C<bsearch_custom>: Comparisons provided by user-defined callback.
-Returns index or undef.
-
-=item * C<bsearch_custom_pos>: Comparisons provided by user-defined callback.
-Returns index or index of insert point for needle.
-
-=item * C<bsearch_transform>: Transformations of list elements provided by
-user-defined callback.  Returns index or undef.
-
-=item * C<bsearch_str_range>: Stringwise comparisons for low and high needles.
+=item * C<binsearch_range>: Performs a search for both low and high needles.
 Returns a pair of indices refering to a range of elements corresponding to
 low and high needles.
 
-=item * C<bsearch_num_range>: Numeric comparisons for low and high needles.
-Returns a pair of indices referring to a range of elements corresponding to
-low and high needles.
-
-=item * C<bsearch_custom_range>: Custom (callback-based) comparisons for
-low and high needles.  Returns a pair of indices referring to a range of
-elements corresponding to low and high needles.
-
 =back
 
+=head2 binsearch CODE NEEDLE ARRAY_HAYSTACK
 
-=head2 SUBROUTINE CATEGORIES
+    $first_found_ix = binsearch { $a cmp $b } $needle, @haystack;
 
-There are three categories of subroutines.  Those that return undef (or an
-empty list in list context) upon failure to find a match; Those that return
-the best insert point for C<$needle> upon failure to find a match; And those
-that return a range of elements spanning from C<$low_needle> to
-C<$high_needle>.
+Pass a code block, a search target, and an array to search.  Uses
+the supplied code block C<$needle> against elements in C<@haystack>.
 
-There are also several comparison styles, for use with different sorts of
-data.  The 'str' functions do stringwise comparisons.  The 'num' functions do
-numeric comparisons.
+See the section entitled B<The Callback Block>, below, for an explanation
+of how the comparator works.
 
-The 'custom' function uses a callback for the comparison.  The 'transform'
-function uses a callback to transform each list element in some user-defined
-way before doing comparisons that are either numeric or string depending on
-whether C<$needle> looks like a number or not.
+Return value will be the lowest index of an element that matches target, or
+undef if target isn't found.
 
-With that explanation, here are the functions:
+=head2 binsearch_pos CODE NEEDLE ARRAY_HAYSTACK
 
+    $first_found_ix = binsearch_pos { $a cmp $b } $needle, @haystack;
 
-=head2 bsearch_str STRING_NEEDLE ARRAY_HAYSTACK
-
-    $first_found_ix = bsearch_str $needle, @haystack;
-
-Finds the string specified by C<$needle> in the array C<@haystack>.  Return
-value is an index to the first (lowest numbered) matching element in
-C<@haystack>, or C<undef> if nothing is found.  String comparisons are used.
-The target must be an exact and complete match.
-
-
-
-=head2 bsearch_num NUMERIC_NEEDLE ARRAY_HAYSTACK
-
-    $first_found_ix = bsearch_num $needle, @haystack;
-
-Finds the numeric needle C<$needle> in the haystack C<@haystack>.
-Return value is an index to the first (lowest numbered) matching element
-in C<@haystack>, or C<undef> if C<$needle> isn't found.
-
-The comparison type is numeric.
-
-
-
-=head2 bsearch_custom CODE NEEDLE ARRAY_HAYSTACK
-
-    $first_found_ix = bsearch_custom { $_[0] cmp $_[1] } $needle, @haystack;
-    $first_found_ix = bsearch_custom \&comparator,       $needle, @haystack;
-
-Pass a code block or subref, a search target, and an array to search.  Uses
-the subroutine supplied in the code block or subref callback to test
-C<$needle> against elements in C<@haystack>.
-
-Return value is the index of the first element equaling C<$needle>.  If no
-element is found, undef is returned.
-
-Beware a potential 'I<gotcha>': When dealing with complex data structures, the
-callback function will have an asymmetrical look to it, which is easy to
-get wrong.  The target will always be referred to by C<$_[0]>, but the right
-hand side of the comparison must refer to the C<$_[1]...>, where C<...> is
-the portion of the data structure to be used in the comparison: C<$_[1][$n]>,
-or C<$_[1]{$k}>, for example.
-
-C<bsearch_custom>, along with the other custom search functions are good
-choices when lists are sorted according to a Unicode collation.
-
-=head2 bsearch_transform CODE NEEDLE ARRAY_HAYSTACK
-
-    $first_found_ix = bsearch_transform { $_[0] }    $needle, @haystack;
-    $first_found_ix = bsearch_transform \&transform, $needle, @haystack );
-
-Pass a transform code block or subref, a needle to find, and a haystack to
-find it in.  Return value is the lowest numbered index to an element matching
-C<$needle>, or C<undef> if nothing is found.
-
-This algorithm detects whether C<$needle> looks like a number or a string.  If
-it looks like a number, numeric comparisons are performed.  Otherwise,
-stringwise comparisons are used.  The transform code block or coderef is
-used to transform each element of the search array to a value that can be
-compared against the target.  This is useful if C<@haystack> contains a
-complex data structure, and less prone to user error in such cases than
-C<bsearch_custom>.
-
-If no transformation is needed, use C<bsearch_str>, C<bsearch_num>, or
-C<bsearch_custom>.
-
-
-
-=head2 bsearch_str_pos STRING_NEEDLE ARRAY_HAYSTACK
-
-    $first_found_ix = bsearch_str_pos $needle, @haystack;
-
-The only difference between this function and C<bsearch_str> is its return
-value upon failure.  C<bsearch_str> returns undef upon failure.
-C<bsearch_str_pos> returns the index of a valid insert point for C<$needle>.
-
-Finds the string specified by C<$needle> in the array C<@haystack>.  Return
-value is an index to the first (lowest numbered) matching element in
-C<@haystack>.  If C<$needle> isn't found, return value is the index of where
-C<$needle> could appropriately be inserted.  String comparisons are used.
-The target must be an exact and complete match.
-
-The position returned upon failure to find C<$needle> satisfies these
-requirements:  If C<$needle> is greater than all elements in C<@haystack>,
-then the return value will be equal to C<scalar @haystack>.  If C<$needle> is
-within the range represented by C<@haystack>, the return value will be the
-index of the first element greater in value than C<$needle>.  In either case,
-the following code could then be used to add C<$needle> to C<@haystack> if it
-isn't found:
-
-    my $index = bsearch_str_pos $needle, @haystack;
-    if( $needle ne $haystack[$index] ) {
-        splice @haystack, $index, 0, $needle;
-    }
-
-
-
-=head2 bsearch_num_pos NUMERIC_NEEDLE ARRAY_HAYSTACK
-
-    $first_found_ix = bsearch_num_pos $needle, @haystack;
-
-The only difference between this function and C<bsearch_num> is its return
-value upon failure.  C<bsearch_num> returns undef upon failure.
-C<bsearch_num_pos> returns the index of a valid insert point for C<$needle>.
-
-Finds the string specified by C<$needle> in the array C<@haystack>.  Return
-value is an index to the first (lowest numbered) matching element in
-C<@haystack>.  If C<$needle> isn't found, return value is the index of where
-C<$needle> could appropriately be inserted.  String comparisons are used.
-The target must be an exact and complete match.
-
-The position returned upon failure to find C<$needle> satisfies these
-requirements:  If C<$needle> is greater than all elements in C<@haystack>,
-then the return value will be equal to C<scalar @haystack>.  If C<$needle> is
-less than, or within the range represented by C<@haystack>, the return value
-will be the index of the first element greater in value than C<$needle>.  In
-either case, the following code could then be used to add C<$needle> to
-C<@haystack> if it isn't found:
-
-    my $index = bsearch_num_pos $needle, @haystack;
-    if( $needle != $haystack[$index] ) {
-        splice @haystack, $index, 0, $needle;
-    }
-
-
-=head2 bsearch_custom_pos CODE NEEDLE ARRAY_HAYSTACK
-
-    $first_found_ix = bsearch_custom_pos { $_[0] cmp $_[1] } $needle, @haystack;
-    $first_found_ix = bsearch_custom_pos \&comparator,       $needle, @haystack;
-
-The only difference between this function and C<bsearch_custom> is its return
-value upon failure.  C<bsearch_custom> returns undef upon failure.
-C<bsearch_custom_pos> returns the index of a valid insert point for
+The only difference between this function and C<binsearch> is its return
+value upon failure.  C<binsearch> returns undef upon failure.
+C<binsearch_pos> returns the index of a valid insert point for
 C<$needle>.
 
-Pass a code block or subref, a search target, and an array to search.  Uses
-the subroutine supplied in the code block or subref callback to test
-C<$needle> against elements in C<@haystack>.
+Pass a code block, a search target, and an array to search.  Uses
+the code block to test C<$needle> against elements in C<@haystack>.
 
 Return value is the index of the first element equaling C<$needle>.  If no
 element is found, the best insert-point for C<$needle> is returned.
 
-Beware a potential 'I<gotcha>': When dealing with complex data structures, the
-callback function will have an asymmetrical look to it, which is easy to
-get wrong.  The target will always be referred to by C<$_[0]>, but the right
-hand side of the comparison must refer to the C<$_[1]...>, where C<...> is
-the portion of the data structure to be used in the comparison: C<$_[1][$n]>,
-or C<$_[1]{$k}>, for example.
 
-As mentioned before the "custom" search functions are well suited to
-searching within lists that are sorted in a Unicode Collation order.
+=head2 binsearch_range CODE LOW_NEEDLE HIGH_NEEDLE ARRAY_HAYSTACK
 
-=head2 bsearch_str_range LOW_STRING_NEEDLE HIGH_STRING_NEEDLE ARRAY_HAYSTACK
+    my( $low, $high ) = binsearch_range { $a <=> $b }, $low_needle, $high_needle, @haystack;
 
-=head2 bsearch_num_range LOW_NUMERIC_NEEDLE HIGH_NUMERIC_NEEDLE ARRAY_HAYSTACK
+Given C<$low_needle> and C<$high_needle>, returns a set of indices that
+represent the range of elements fitting within C<$low_needle> and
+C<$high_needle>'s bounds.  This might be useful, for example, in finding all
+transations that occurred between 02012013 and 02292013.
 
-Given C<$needle_low> and C<$needle_high>, return a low and high set of indices
-that represent the range of elements fitting within C<$needle_low> and
-C<$needle_high> (inclusive).
+I<This algorithm was adapted from Mastering Algorithms with Perl, page 172 and
+173.>
 
-Here's an example:
+=head2 The callback block (The comparator)
 
-    my @haystack = ( 100, 200, 300, 400, 500 );
-    my( $low, $high ) = bsearch_num_range 200, 400, @haystack;
-    my @found = @haystack[ $low .. $high ]; # @found holds ( 200, 300, 400 ).
-
-=head2 bsearch_custom_range CODE LOW_NEEDLE HIGH_NEEDLE ARRAY_HAYSTACK
-
-Works as the previous two searches, except the first parameter should be
-a code block or reference that provides the comparison.  This is well
-suited to complex data, or data sorted according to a Unicode Collation.
-
-=head2 \&comparator
-
-B<(callback)>
-
-Comparator functions are used by C<bsearch_custom>.
-
-Comparators are references to functions that accept as parameters a target,
-and a list element, returning the result of the relational comparison of the
-two values.  A good example would be the code block in a C<sort> function,
-except that our comparators get their input from C<@_>, where C<sort>'s
-comparator functions get their input from C<$a> and C<$b>.
+Comparators in L<List::BinarySearch> are used to compare the target (needle)
+with individual haystack elements, returning the result of the relational
+comparison of the two values.  A good example would be the code block in a
+C<sort> function.
 
 Basic comparators might be defined like this:
 
     # Numeric comparisons:
-    $comp = sub {
-        my( $needle, $haystack_item ) = @_;
-        return $needle <=> $haystack_item;
-    };
+    binsearch { $a <=> $b } $needle, @haystack;
 
-    # Non-numeric (stringwise) comparisons:
-    $comp = sub {
-        my( $needle, $haystack_item ) = @_;
-        return $needle cmp $haystack_item;
-    };
+    # Stringwise comparisons:
+    binsearch { $a cmp $b } $needle, @haystack;
 
-    # Unicode Collation Algorithm comparisons;
+    # Unicode Collation Algorithm comparisons
     $Collator = Unicode::Collate->new;
-    $comp = sub {
-		my( $needle, $haystack_item ) = @_;
-		return $Collator->( $needle, $haystack_item );
-	};
+    binsearch { $Collator->( $a, $b ) } $needle, @haystack;
 
-The first parameter passed to the comparator will be the target.  The second
-parameter will be the contents of the element being tested.  This leads to
-an asymmetry that might be prone to "gotchas" when writing custom comparators
-for searching complex data structures.  As an example, consider the following
-data structure:
+C<$a> represents the target.  C<$b> represents the contents of the haystack
+element being tested.  This leads to an asymmetry that might be prone to
+"gotchas" when writing custom comparators for searching complex data structures.
+As an example, consider the following data structure:
 
     my @structure = (
         [ 100, 'ape'  ],
@@ -695,60 +505,65 @@ data structure:
 
 A numeric custom comparator for such a data structure would look like this:
 
-    sub{ $_[0] <=> $_[1][0]; }
+    sub{ $a <=> $b[0] }
 
-...or more explicitly...
+In this regard, the callback is unlike C<sort>, because C<sort> is always
+comparing to elements, whereas C<binsearch> is comparing a target with an
+element.
 
-    sub{
-        my( $needle, $haystack_item ) = @_;
-        return $needle <=> $haystack_item->[0];
-    }
+=head2 DEPRECATED FUNCTIONS
 
-Therefore, a call to C<bsearch_custom> where the target (or needle) is to
-solve for C<$found_ix> such that C<$structure[$found_ix][0] == 200> might look
-like this:
+The following have been deprecated and should not be used.  They will be
+eliminated in a future version of L<List::BinarySearch>.  The reason for their
+deprecation is that List::BinarySearch::XS provides enough performance gain as
+to make numeric-specialized and string-specialized versions of the binary search
+routine obsolete.  If you need high performance, install List::BinarySearch::XS.
 
-    my $found_ix = bsearch_custom { $_[0] <=> $_[1][0] }, 200, @structure;
-    print $structure[$found_ix][1], "\n" if defined $found_ix;
-    # prints 'cat'
+=head3 bsearch_custom
 
+Replaced by binsearch. Same syntax.
 
+=head3 bsearch_custom_pos
 
-=head2 \&transform
+Replaced by binsearch_pos. Same syntax.
 
-B<(callback)>
+=head3 bsearch_custom_range
 
-The transform callback routine is used by C<bsearch_transform()>
-to transform a given search list element into something that can be compared
-against C<$needle>.  As an example, consider the following complex data
-structure:
+Replaced by binsearch_range. Same syntax.
 
-    my @structure = (
-        [ 100, 'ape'  ],
-        [ 200, 'cat'  ],
-        [ 300, 'dog'  ],
-        [ 400, 'frog' ]
-    );
+=head3 bsearch_str
 
-If the goal is do a numeric search using the first element of each
-integer/string pair, the transform sub might be written like this:
+Instead use C<< binsearch { $a cmp $b } $needle, @haystack; >>.
 
-    sub transform {
-        return $_[0][0];    # Returns 100, 200, 300, etc.
-    }
+=head3 bsearch_str_pos
 
-Or if the goal is instead to search by the second element of each
-int/str pair, the sub would instead look like this:
+Instead use C<< binsearch_pos { $a cmp $b } $needle, @haystack; >>.
 
-    sub transform {
-        return $_[0][1];
-    }
+=head3 bsearch_str_range
 
-A transform sub that performs no transform would be a simple identity
-function:
+Instead use C<< binsearch_range { $a cmp $b } $needle, @haystack; >>.
 
-    sub transform { $_[0] }
+=head3 bsearch_num
 
+Instead use C<< binsearch { $a <=> $b } $needle, @haystack; >>.
+
+=head3 bsearch_num_pos
+
+Instead use C<< binsearch_pos { $a <=> $b } $needle, @haystack; >>.
+
+=head3 bsearch_num_range
+
+Instead use C<< binsearch_range { $a <=> $b } $needle, @haystack; >>.
+
+=head3 bsearch_transform
+
+Instead use C<< binsearch { $comparator->($a,$b) } $needle, @haystack; >>.
+
+Also, the old "pass by @_" callbacks have been deprecated in favor of callbacks
+that use C<$a> and C<$b>.  If you have been using:
+C<< bsearch_custom {$_[0] <=>$_[1]} $needle, @haystack; >>, instead use:
+C<< binsearch { $a <=> $b } $needle, @haystack; >>.  It's much easier on
+the eyes.
 
 
 =head1 DATA SET REQUIREMENTS
@@ -761,69 +576,66 @@ are:
 
 =item * B<The lists must be in ascending sorted order>.
 
-This is a big one.  Keep in mind that the best sort routines run in
-O(n log n) time.  It makes no sense to sort a list in O(n log n), and
-then perform a single O(log n) binary search when List::Util C<first>
-could accomplish the same thing in O(n) time.  A Binary Search only
-makes sense if there are other good reasons for keeping the data set
-sorted in the first place.
+This is a big one.  The best sort routines run in O(n log n) time.  It makes no
+sense to sort a list in O(n log n), and then perform a single O(log n) binary
+search when List::Util C<first> could accomplish the same thing in O(n) time
+without sorting.  A Binary Search only makes sense if there are other good
+reasons for keeping the data set sorted in the first place, or if there are
+going to be many lookups to offset the cost of sorting.  ...and if there are, a
+hash may be a better option anyway.
 
 B<Passing an unsorted list to these Binary Search algorithms will result
 in undefined behavior.  There is no validity checking.>
 
-A Binary Search consumes O(log n) time.  It would, therefore, be foolish
-for these algorithms to pre-check the list for sortedness, as that would
-require linear, or O(n) time.  Since no sortedness testing is done,
+Because a Binary Search consumes O(log n) time, it would, be foolish
+for these algorithms to pre-check the list for sortedness, as the validity check
+would consume linear, or O(n) time.  Since no sortedness testing is done,
 there can be no guarantees as to what will happen if an unsorted list is
-passed to a binary search.
-
-=item * Data that is more complex than simple numeric or string lists
-will require a custom comparator or transform subroutine.  This includes
-search keys that are buried within data structures, and strings sorted
-using a Unicode Collation Algorithm.
+passed to a binary search.  B<You have been warned.>
 
 =item * These functions are prototyped, either as (&$\@), or as ($\@).
 What this implementation detail means is that C<@haystack> is implicitly
 and invisibly passed by reference.  Thus, bare lists will not work.
 This downside of prototypes is an unfortunate side effect of specifying
-an API thatclosely matches the one commonly used with List::Util and
+an API thatclosely matches the one commonly used with C<sort>, List::Util and
 List::MoreUtils functions.  It can contribute to surprise when the user
 tries to pass a bare list.  The upside is a more familiar user
-interface, and the efficiency of pass-by-ref.
+interface, cleaner calling syntax, and the efficiency of pass-by-reference.
+
+=item * The objects being searched within must be capable of being evaluated for
+relationaity. (C++ folks will know what that means. For everyone else don't
+worry; if you know how to C<sort> you'll know how to C<binsearch>.)
 
 =back
 
 =head1 UNICODE SUPPORT
 
-All of the stringwise searches use Perl's native C<cmp> operator for
-comparisons.  This is fine for lists that are naively sorted based on
-Perl's standard C<sort>.  But for lists sorted according to the Unicode
-Collation Algorithm, use the "custom" searches: 
-C<bsearch_custom> or C<bsearch_custom_pos>, preferably with 
-L<Unicode::Collate>'s C<< $Collator->cmp($a, $b) >> syntax.
+Lists sorted according to the Unicode Collation Algorithm must be searched using
+the same Unicode Collation Algorithm, Here's an example using
+L<Unicode::Collate>'s C<< $Collator->cmp($a,$b) >>:
+
+    my $found_index = binsearch { $Collator->cmp($a, $b) } $needle, @haystack;
+
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-This module should run under any Perl from 5.6.0 onward.  There are no special
-environment or configuration concerns to address.  In the future, an XS plugin
-will be implemented, and at that time there may be additional configuration
-details in this section.
-
-
+This module should run under any Perl from 5.8.0 onward.  There are no special
+environment or configuration concerns to address.  An XS plugin is nearing
+completion, and when it becomes available simply installing it will allow
+L<List::BinarySearch> to silently gain the performance benefit it provides.
 
 =head1 DEPENDENCIES
 
-This module uses L<Exporter|Exporter> and L<Scalar::Util|Scalar::Util>, both
-of which are core modules.  Installation requires L<Test::More|Test::More>,
-which is also a core module.
-
+This module uses L<Exporter|Exporter>, and in the near future, will be able to
+automatically make use of L<List::BinarySearch::XS>
 
 
 =head1 INCOMPATIBILITIES
 
-This module hasn't been tested on Perl versions that predate Perl 5.6.0.
-
-
+In prepration for use with L<List::BinarySearch::XS>, and due to some breaking
+changes between 5.6 XS and 5.8 XS, this module's minimum Perl version has been
+shifted from Perl 5.6.0 to Perl 5.8.0.  5.8 replaced 5.6 in July 2002.  It's
+time to move on.
 
 =head1 AUTHOR
 

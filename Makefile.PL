@@ -28,7 +28,7 @@ WriteMakefile(
         provides => {
             'List::BinarySearch' => {
                 file    => 'lib/List/BinarySearch.pm',
-                version => '0.11'
+                version => '0.11_001'
             },
         },
     },

@@ -191,4 +191,8 @@ subtest "Complex data structure testing with custom comparator." => sub {
     done_testing();
 };
 
+my @new_test = ( 100, 200, 300 );
+my $found_ix = binsearch { $a <=> $b } 200, @new_test;
+is( $found_ix, 1, 'binsearch used $a and $b to find 200 at position 1.' );
+
 done_testing();
