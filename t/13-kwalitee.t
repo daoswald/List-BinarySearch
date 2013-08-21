@@ -12,17 +12,20 @@ if ( not $ENV{RELEASE_TESTING} ) {
     my $msg =
         'Author Test: Set $ENV{RELEASE_TESTING} to a true value to run.';
     plan( skip_all => $msg );
+    done_testing();
 }
 
 
-eval { require Test::Kwalitee; Test::Kwalitee->import() }; ## no critic (eval)
-
-plan( skip_all => 'Test::Kwalitee not installed; skipping' ) if $@;
-
-done_testing();
-
-
-# Clean up.  I haven't traced out where this is getting created, but we
-# certainly don't need to leave it behind as clutter.
-
-unlink 'Debian_CPANTS.txt' if -e 'Debian_CPANTS.txt';
+unless(
+  eval {
+    require Test::Kwalitee;
+    Test::Kwalitee->import();
+    # Clean up. I don't know why this persists, but we certainly don't need to
+    # leave clutter behind.
+    unlink 'Debian_CPANTS.txt' if -e 'Debian_CPANTS.txt';
+    1;
+  }
+) {
+  plan( skip_all => 'Test::Kwalitee not installed; skipping' ) if $@;
+  done_testing();
+}

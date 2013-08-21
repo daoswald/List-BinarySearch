@@ -5,6 +5,7 @@ package List::BinarySearch;
 use 5.006000;
 use strict;
 use warnings;
+use Carp;
 
 use Scalar::Util qw( looks_like_number );
 
@@ -91,10 +92,11 @@ sub binsearch (&$\@) {
     my ( $code, $target, $aref ) = @_;
     my $min = 0;
     my $max = $#{$aref};
-    no strict 'refs';
     while ( $max > $min ) {
         my $mid = int( ( $min + $max ) / 2 );
-        local ( ${caller() . '::a'}, ${caller() . '::b'} ) = ( $target, $aref->[$mid] );            # Future use.
+        no strict 'refs'; ## no critic(strict)
+        local ( ${caller() . '::a'}, ${caller() . '::b'} )
+          = ( $target, $aref->[$mid] );                            # Future use.
         if ( $code->( $target, $aref->[$mid] ) > 0 ) {
             $min = $mid + 1;
         }
@@ -102,11 +104,13 @@ sub binsearch (&$\@) {
             $max = $mid;
         }
     }
-
-    local ( ${caller() . '::a'}, ${caller() . '::b'} ) = ( $target, $aref->[$min] );                # Future use.
-    return $min
-      if $max == $min && $code->( $target, $aref->[$min] ) == 0;
-
+    {
+      no strict 'refs'; ## no critic(strict)
+      local ( ${caller() . '::a'}, ${caller() . '::b'} )
+        = ( $target, $aref->[$min] );                              # Future use.
+      return $min
+        if $max == $min && $code->( $target, $aref->[$min] ) == 0;
+    }
     return;    # Undef in scalar context, empty list in list context.
 }
 
@@ -205,8 +209,9 @@ sub binsearch_pos (&$\@) {
     my ( $low, $high ) = ( 0, scalar @{$aref} );
     while ( $low < $high ) {
         my $cur = int( ( $low + $high ) / 2 );
-        no strict 'refs';
-        local ( ${ caller() . '::a'}, ${ caller() . '::b'} ) = ( $target, $aref->[$cur] );             # Future use.
+        no strict 'refs';  ## no critic(strict)
+        local ( ${ caller() . '::a'}, ${ caller() . '::b'} )
+          = ( $target, $aref->[$cur] );                            # Future use.
         if ( $comp->( $target, $aref->[$cur] ) > 0 ) {
             $low = $cur + 1;
         }
@@ -243,13 +248,16 @@ sub binsearch_range (&$$\@) {
 	my( $code, $low_target, $high_target, $aref ) = @_;
 	my $index_low  = bsearch_custom_pos( \&$code, $low_target,  @$aref );
 	my $index_high = bsearch_custom_pos( \&$code, $high_target, @$aref );
-  no strict 'refs';
-  local( ${caller() . '::a'}, ${caller() . '::b'} ) = ( $aref->[$index_high], $high_target );        # Future use.
-	if(    $index_high == scalar @$aref
-	    or $code->( $aref->[$index_high], $high_target ) > 0 )
-	{
-		$index_high--;
-	}
+  {
+    no strict 'refs'; ## no critic(strict)
+    local( ${caller() . '::a'}, ${caller() . '::b'} )
+      = ( $aref->[$index_high], $high_target );                    # Future use.
+    if(    $index_high == scalar @$aref
+        or $code->( $aref->[$index_high], $high_target ) > 0 )
+	  {
+		  $index_high--;
+	  }
+  }
 	return ( $index_low, $index_high );
 }
 
@@ -295,33 +303,27 @@ Examples:
 
 
     use List::BinarySearch qw( :all );
-    use List::BinarySearch qw(
-        binsearch           binsearch_pos           binsearch_range
-    );
+    use List::BinarySearch qw( binsearch  binsearch_pos  binsearch_range );
 
-    my @num_array =   ( 100, 200, 300, 400, 500 );
-    my @str_array = qw( Bach Beethoven Brahms Mozart Schubert );
+    @num_array =   ( 100, 200, 300, 400, 500 );
+    @str_array = qw( Bach Beethoven Brahms Mozart Schubert );
 
-    my $index;
 
-    # binsearch returns the matching element with lowest index.
+    # Find the lowest index of a matching element.
 
-    $index = binsearch { $a <=> $b } 300, @num_array;
-    $index = binsearch { $a cmp $b } 'Mozart', @str_array;  # Stringy cmp.
+    $index = binsearch {$a <=> $b} 300, @num_array;
+    $index = binsearch {$a cmp $b} 'Mozart', @str_array;      # Stringy cmp.
+    $index = binsearch {$a <=> $b} 42, @num_array;            # not found: undef
 
-    # binsearch returns 'undef' if nothing is found:
+    # Find the lowest index of a matching element, or best insert point.
 
-    $index = binsearch { $a cmp $b } 'Meatloaf', @str_array; # not found: undef
-    $index = binsearch { $a <=> $b } 42,         @num_array; # not found: undef
+    $index = binsearch_pos {$a cmp $b} 'Chopin', @str_array;  # Insert at [3].
+    $index = binsearch_pos 600, @num_array;                   # Insert at [5].
 
-    # binsearch_pos returns lowest index of matching element, or best insert
-    # point if no match is found.
+    splice @num_array, $index, 1, 600
+      if( $num_array[$index] != 600 );                        # Insertion at [5]
 
-    $index = binsearch_pos { $a cmp $b } 'Chopin', @str_array; # Returns 3 - Best insert-at position.
-    $index = binsearch_pos 600, @num_array; # Returns 5 - Best insert-at position.
-    splice @num_array, $index, 1, 600 if( $num_array[$index] != 600 ); # Safe to insert at $index.
-
-    $index = binsearch_pos { $a <=> $b } 200, @num_array; # Returns 1; Matching element's index.
+    $index = binsearch_pos { $a <=> $b } 200, @num_array;     # Matched at [1].
 
     # The following functions return an inclusive range.
 
@@ -436,10 +438,12 @@ low and high needles.
     $first_found_ix = binsearch { $a cmp $b } $needle, @haystack;
 
 Pass a code block, a search target, and an array to search.  Uses
-the supplied code block C<$needle> against elements in C<@haystack>.
+the supplied code block C<$needle> to test the needle against elements
+in C<@haystack>.
 
 See the section entitled B<The Callback Block>, below, for an explanation
-of how the comparator works.
+of how the comparator works
+(hint: very similar to C<< sort { $a <=> $b } ... >> ).
 
 Return value will be the lowest index of an element that matches target, or
 undef if target isn't found.
@@ -462,7 +466,8 @@ element is found, the best insert-point for C<$needle> is returned.
 
 =head2 binsearch_range CODE LOW_NEEDLE HIGH_NEEDLE ARRAY_HAYSTACK
 
-    my( $low, $high ) = binsearch_range { $a <=> $b }, $low_needle, $high_needle, @haystack;
+    my( $low, $high )
+      = binsearch_range { $a <=> $b }, $low_needle, $high_needle, @haystack;
 
 Given C<$low_needle> and C<$high_needle>, returns a set of indices that
 represent the range of elements fitting within C<$low_needle> and
@@ -574,37 +579,31 @@ are:
 
 =over 4
 
-=item * B<The lists must be in ascending sorted order>.
+=item * B<The list must be in ascending sorted order>.
 
 This is a big one.  The best sort routines run in O(n log n) time.  It makes no
-sense to sort a list in O(n log n), and then perform a single O(log n) binary
-search when List::Util C<first> could accomplish the same thing in O(n) time
-without sorting.  A Binary Search only makes sense if there are other good
-reasons for keeping the data set sorted in the first place, or if there are
-going to be many lookups to offset the cost of sorting.  ...and if there are, a
-hash may be a better option anyway.
+sense to sort a list in O(n log n) time, and then perform a single O(log n)
+binary search when List::Util C<first> could accomplish the same thing in O(n)
+time without sorting.
 
-B<Passing an unsorted list to these Binary Search algorithms will result
-in undefined behavior.  There is no validity checking.>
+=item * B<The list must be in ascending sorted order.>
 
-Because a Binary Search consumes O(log n) time, it would, be foolish
-for these algorithms to pre-check the list for sortedness, as the validity check
-would consume linear, or O(n) time.  Since no sortedness testing is done,
-there can be no guarantees as to what will happen if an unsorted list is
-passed to a binary search.  B<You have been warned.>
+A Binary Search consumes O(log n) time. We don't want to waste linear time
+verifying the list is sordted, so B<there is no validity checking. You have
+been warned.>
 
-=item * These functions are prototyped, either as (&$\@), or as ($\@).
-What this implementation detail means is that C<@haystack> is implicitly
-and invisibly passed by reference.  Thus, bare lists will not work.
-This downside of prototypes is an unfortunate side effect of specifying
-an API thatclosely matches the one commonly used with C<sort>, List::Util and
-List::MoreUtils functions.  It can contribute to surprise when the user
-tries to pass a bare list.  The upside is a more familiar user
-interface, cleaner calling syntax, and the efficiency of pass-by-reference.
+=item * B<These functions are prototyped> as (&$\@) or ($\@).
 
-=item * The objects being searched within must be capable of being evaluated for
-relationaity. (C++ folks will know what that means. For everyone else don't
-worry; if you know how to C<sort> you'll know how to C<binsearch>.)
+What this implementation detail means is that C<@haystack> is implicitly passed
+by reference.  This is the price we pay for a familiar user interface, cleaner
+calling syntax, and the automatic efficiency of pass-by-reference.
+
+=item * B<Objects in the search lists must be capable of being evaluated for
+relationaity.>
+
+I threw that in for C++ folks who have spent some time with Effective STL.  For
+everyone else don't worry; if you know how to C<sort> you know how to
+C<binsearch>.
 
 =back
 

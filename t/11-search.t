@@ -6,6 +6,8 @@ use Test::More;
 
 use List::BinarySearch qw( :all );
 
+local( $a, $b ) = ( $a, $b );
+
 my @integers    = ( 100, 200, 300, 400, 500 );
 my @even_length = ( 100, 200, 300, 400, 500, 600 );
 my @non_unique  = ( 100, 200, 200, 400, 400, 400, 500, 500 );
@@ -194,5 +196,11 @@ subtest "Complex data structure testing with custom comparator." => sub {
 my @new_test = ( 100, 200, 300 );
 my $found_ix = binsearch { $a <=> $b } 200, @new_test;
 is( $found_ix, 1, 'binsearch used $a and $b to find 200 at position 1.' );
+$found_ix = binsearch_pos { $a <=> $b } 200, @new_test;
+is( $found_ix, 1, 'binsearch_pos returns correct found index.' );
+$found_ix = binsearch_pos { $a <=> $b } 250, @new_test;
+is( $found_ix, 2, 'binsearch_pos returns correct insertion point.' );
+
+
 
 done_testing();
