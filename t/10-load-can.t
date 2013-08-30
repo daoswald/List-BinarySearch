@@ -10,10 +10,6 @@ BEGIN {
         || BAIL_OUT();
 }
 
-diag( "Testing List::BinarySearch " .
-      "$List::BinarySearch::VERSION, Perl $], $^X"
-);
-
 
 can_ok(
     'List::BinarySearch',
