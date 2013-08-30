@@ -246,8 +246,8 @@ sub bsearch_str_range ($$\@) {
 
 sub binsearch_range (&$$\@) {
 	my( $code, $low_target, $high_target, $aref ) = @_;
-	my $index_low  = bsearch_custom_pos( \&$code, $low_target,  @$aref );
-	my $index_high = bsearch_custom_pos( \&$code, $high_target, @$aref );
+	my $index_low  = binsearch_pos( \&$code, $low_target,  @$aref );
+	my $index_high = binsearch_pos( \&$code, $high_target, @$aref );
   {
     no strict 'refs'; ## no critic(strict)
     local( ${caller() . '::a'}, ${caller() . '::b'} )
