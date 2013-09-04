@@ -1,5 +1,17 @@
 Revision history for List::BinarySearch
 
+0.11_002 2013-09-03
+  - DEVELOPER'S RELEASE
+  - POD revisions to recommend installing List::BinarySearch::XS
+  - Updates to tests, including tests to verify we get the correct
+    binsearch implementation depending on availability of XS module.
+  - Split pure-Perl implementations of binsearch and binsearch_pos
+    into List::BinarySearch::PP, included with distribution.
+  - List::BinarySearch will now use List::BinarySearch::XS for 
+    binsearch and binsearch_pos implementations, or the ::PP module
+    (included) if the ::XS hasn't been installed.
+    (May be overridden by setting $ENV{List_BinarySearch_PP} true.)
+
 0.11_001 2013-08-20
   - DEVELOPER'S RELEASE
   - Deprecated all existing functions under their current names.

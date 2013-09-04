@@ -35,4 +35,12 @@ is( $pkg, "List::BinarySearch::PP",
     '$List::BinarySearch::PP=1 forces pure-Perl implementation.'
 );
 
+is( \&binsearch, \&List::BinarySearch::PP::binsearch,
+    'Coderefs match for pure-Perl implementation in package main.'
+);
+
+is( \&List::BinarySearch::binsearch, \&List::BinarySearch::PP::binsearch,
+    'Coderefs match for pure-Perl implementation in package List::BinarySearch'
+);
+
 done_testing;

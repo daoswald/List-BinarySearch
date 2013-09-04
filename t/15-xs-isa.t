@@ -44,4 +44,11 @@ is( $pkg, "List::BinarySearch::XS",
     '$List::BinarySearch::PP=1 forces pure-Perl implementation.'
 );
 
+is( \&binsearch, \&List::BinarySearch::XS::binsearch,
+    "Stringified coderefs match for XS implementation in package main."
+);
+is( \&List::BinarySearch::binsearch, \&List::BinarySearch::XS::binsearch,
+    'Stringified coderefs match for XS implementation in package List::BinarySearch.'
+);
+
 done_testing;
