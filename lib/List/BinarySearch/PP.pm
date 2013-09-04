@@ -2,8 +2,11 @@
 
 package List::BinarySearch::PP;
 
+use 5.006000
+
 use strict;
 use warnings;
+use Carp;
 
 require Exporter;
 
@@ -14,7 +17,7 @@ our @ISA    = qw(Exporter);    ## no critic (ISA)
 our @EXPORT = qw( binsearch binsearch_pos ); ## no critic (export)
 
 
-our $VERSION = '0.011_002';
+our $VERSION = '0.011_003';
 $VERSION = eval $VERSION;  ## no critic (eval)
 
 
@@ -30,7 +33,7 @@ sub binsearch (&$\@) {
         my $mid = int( ( $min + $max ) / 2 );
         no strict 'refs'; ## no critic(strict)
         local ( ${caller() . '::a'}, ${caller() . '::b'} )
-          = ( $target, $aref->[$mid] );                            # Future use.
+          = ( $target, $aref->[$mid] );
         if ( $code->( $target, $aref->[$mid] ) > 0 ) {
             $min = $mid + 1;
         }
@@ -41,7 +44,7 @@ sub binsearch (&$\@) {
     {
       no strict 'refs'; ## no critic(strict)
       local ( ${caller() . '::a'}, ${caller() . '::b'} )
-        = ( $target, $aref->[$min] );                              # Future use.
+        = ( $target, $aref->[$min] );
       return $min
         if $max == $min && $code->( $target, $aref->[$min] ) == 0;
     }
@@ -92,25 +95,19 @@ Examples:
 
     use List::BinarySearch qw( binsearch  binsearch_pos  binsearch_range );
 
-    @num_array =   ( 100, 200, 300, 400, 500 );
-    @str_array = qw( Bach Beethoven Brahms Mozart Schubert );
-
-
     # Find the lowest index of a matching element.
-
-    $index = binsearch {$a <=> $b} 300, @num_array;
-    $index = binsearch {$a cmp $b} 'Mozart', @str_array;      # Stringy cmp.
-    $index = binsearch {$a <=> $b} 42, @num_array;            # not found: undef
+    $index = binsearch {$a <=> $b} 300, @{[ 100, 200, 300, 400 ]};
+    $index = binsearch {$a cmp $b} 'Mozart', @{[ qw/ Bach Brahms Mozart / ]};
+    $index = binsearch {$a <=> $b} 42, @{[ 10, 20, 30 ]}      # not found: undef
 
     # Find the lowest index of a matching element, or best insert point.
+    $index = binsearch_pos {$a cmp $b} 'Chopin', @{[ qw/ Bach Brahms Mozart/ ]};  # Insert at [2].
+    $index = binsearch_pos 60, @{[ 10, 20, 30, 40, 50, 70 ]}; # Insert at [5].
 
-    $index = binsearch_pos {$a cmp $b} 'Chopin', @str_array;  # Insert at [3].
-    $index = binsearch_pos 600, @num_array;                   # Insert at [5].
+    splice @num_array, $index, 1, 60
+      if( $num_array[$index] != 60 );                         # Insertion at [5]
 
-    splice @num_array, $index, 1, 600
-      if( $num_array[$index] != 600 );                        # Insertion at [5]
-
-    $index = binsearch_pos { $a <=> $b } 200, @num_array;     # Matched at [1].
+    $index = binsearch_pos { $a <=> $b } 20, @{[ 10, 20, 30 ]}; # Matched at [1]
 
 
 =head1 DESCRIPTION
@@ -147,20 +144,20 @@ it isn't found.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-Perl 5.8.0 or newer required.  This module is part of the L<List::BinarySearch>
+Perl 5.6 or newer required.  This module is part of the L<List::BinarySearch>
 distribution, and is intended for use by the C<List::BinarySearch> module.
-It shouldn't be directly used by code outside of this distribution.
+Though the user interface is unlikely to change, it shouldn't be directly used
+by code outside of this distribution.
+
 
 =head1 DEPENDENCIES
 
-This module uses L<Exporter|Exporter>.
+Perl 5.6.
 
 
 =head1 INCOMPATIBILITIES
 
-Perl versions prior to 5.8.0 aren't officially supported by this distribution.
-The pure-Perl module, C<List::BinarySearch::PP> is probably Perl 5.6
-compatible, but hasn't been smoke-tested on any Perl prior to 5.8.
+Perl versions prior to 5.6 aren't officially supported by this distribution.
 
 
 =head1 AUTHOR
@@ -221,12 +218,8 @@ L<http://search.cpan.org/dist/List-BinarySearch/>
 =head1 ACKNOWLEDGEMENTS
 
 L<Mastering Algorithms with Perl|http://shop.oreilly.com/product/9781565923980.do>,
-from L<O'Reilly|http://www.oreilly.com>: for the inspiration (and much of the
-code) behind the positional search.  Quoting MAwP: "I<...the binary search was
-first documented in 1946 but the first algorithm that worked for all sizes of
-array was not published until 1962.>" (A summary of a passage from Knuth:
-Sorting and Searching, 6.2.1.)
-
+from L<O'Reilly|http://www.oreilly.com>: much of the code behind the positional
+search.
 
 =head1 LICENSE AND COPYRIGHT
 

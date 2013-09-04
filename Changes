@@ -1,5 +1,13 @@
 Revision history for List::BinarySearch
 
+0.11_003 2013-09-04
+  - DEVELOPER'S RELEASE
+  - Strengthened language on deprecation of obsolete functions.
+  - Improvements to isa tests.
+  - Fixed a typo in the POD demonstrating comparator complexity for complex
+    datastructures (see, it bit me too).
+  - Restore Perl 5.6 compatibility for the pure-Perl implementation.
+
 0.11_002 2013-09-03
   - DEVELOPER'S RELEASE
   - POD revisions to recommend installing List::BinarySearch::XS

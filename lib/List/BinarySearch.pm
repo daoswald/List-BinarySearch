@@ -47,7 +47,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-our $VERSION = '0.11_002';
+our $VERSION = '0.11_003';
 
 # Needed for developer's releases: See perlmodstyle.
 $VERSION = eval $VERSION;    ## no critic (eval,version)
@@ -264,15 +264,16 @@ List::BinarySearch - Binary Search within a sorted array.
 
 =head1 SYNOPSIS
 
-This module performs a binary search on an array passed by reference, or on
-an array or list passed as a flat list.
+This module performs a binary search on an array.
 
 Examples:
 
 
-    use List::BinarySearch qw( :all );
+    use List::BinarySearch qw( :all );  # ... or ...
     use List::BinarySearch qw( binsearch  binsearch_pos  binsearch_range );
 
+
+    # Some ordered arrays to search within.
     @num_array =   ( 100, 200, 300, 400, 500 );
     @str_array = qw( Bach Beethoven Brahms Mozart Schubert );
 
@@ -283,6 +284,7 @@ Examples:
     $index = binsearch {$a cmp $b} 'Mozart', @str_array;      # Stringy cmp.
     $index = binsearch {$a <=> $b} 42, @num_array;            # not found: undef
 
+
     # Find the lowest index of a matching element, or best insert point.
 
     $index = binsearch_pos {$a cmp $b} 'Chopin', @str_array;  # Insert at [3].
@@ -292,6 +294,7 @@ Examples:
       if( $num_array[$index] != 600 );                        # Insertion at [5]
 
     $index = binsearch_pos { $a <=> $b } 200, @num_array;     # Matched at [1].
+
 
     # The following functions return an inclusive range.
 
@@ -311,33 +314,32 @@ On each iteration the search domain is cut in half, until the result is found.
 The computational complexity of a binary search is O(log n).
 
 The binary search algorithm implemented in this module is known as a
-Deferred Detection variant on the traditional Binary Search.  Deferred
+I<Deferred Detection> variant on the traditional Binary Search.  Deferred
 Detection provides B<stable searches>.  Stable binary search algorithms have
 the following characteristics, contrasted with their unstable binary search
 cousins:
 
 =over 4
 
-=item * In the case of non-unique keys, a stable binary search will
-always return the lowest-indexed matching element.  An unstable binary search
-would return the first one found, which may not be the chronological first.
+=item * In the case of non-unique keys, a stable binary search will always
+return the lowest-indexed matching element.  An unstable binary search would
+return the first one found, which may not be the chronological first.
 
 =item * Best and worst case time complexity is always O(log n).  Unstable
-searches may find the target in fewer iterations in the best case, but in the
-worst case would still be O(log n).  In practical terms, this difference is
-usually not meaningful.
+searches may stop once the target is found, but in the worst case are still
+O(log n).  In practical terms, this difference is usually not meaningful.
 
 =item * Stable binary searches only require one relational comparison of a
 given pair of data elements per iteration, where unstable binary searches
 require two comparisons per iteration.
 
 =item * The net result is that although an unstable binary search might have
-a better "best case" time complexity, the fact that a stable binary search
-gets away with fewer comparisons per iteration gives it better performance
-in the worst case, and approximately equal performance in the average case.
-By trading away slightly better "best case" performance, the stable search
-gains the guarantee that the element found will always be the lowest-indexed
-element in a range of non-unique keys.
+better "best case" performance, the fact that a stable binary search gets away
+with fewer comparisons per iteration gives it better performance in the worst
+case, and approximately equal performance in the average case. By trading away
+slightly better "best case" performance, the stable search gains the guarantee
+that the element found will always be the lowest-indexed element in a range of
+non-unique keys.
 
 =back
 
@@ -349,6 +351,8 @@ true value.
 
 
 =head1 RATIONALE
+
+B<A binary search is pretty simple, right?  Why use a module for this?>
 
 Quoting from
 L<Wikipedia|http://en.wikipedia.org/wiki/Binary_search_algorithm>:  I<When Jon
@@ -363,31 +367,28 @@ undetected for over twenty years.>
 So the answer to the question "Why use a module for this?" is "So that you
 don't have to write, test, and debug your own implementation."
 
-Nevertheless, before using this module the user should weigh the other
-options: linear searches ( C<grep> or C<List::Util::first> ), or hash based
-searches. A binary search only makes sense if the data set is already sorted
-in ascending order, and if it is determined that the cost of a linear search,
-or the linear-time conversion to a hash-based container is too inefficient or
-demands too much memory.  So often, it just doesn't make sense to try to
-optimize beyond what Perl's tools natively provide.
 
-However, there are cases where a binary search may be an excellent choice.
-Finding the first matching element in a list of 1,000,000 items with a linear
-search would have a worst-case of 1,000,000 iterations, whereas the worst case
-for a binary search of 1,000,000 elements is about 20 iterations.  In fact, if
-many lookups will be performed on a seldom-changed list, the savings of
-O(log n) lookups may outweigh the cost of sorting or performing occasional
-ordered inserts.
+B<< Perl has C<grep>, hashes, and other alternatives, right? >>
 
-Profile, then benchmark, then consider (and benchmark) the options, and
-finally, optimize.
+Yes, before using this module the user should weigh the other options such as
+linear searches ( C<grep> or C<List::Util::first> ), or hash based searches. A
+binary search requires an ordered list, so one must weigh the cost of sorting or
+maintaining the list in sorted order.  Ordered lists have O(n) time complexity
+for inserts.  Binary Searches are best when the data set is already ordered, or
+will be searched enough times to justify the cost of an initial sort.
 
+There are cases where a binary search may be an excellent choice. Finding the
+first matching element in a list of 1,000,000 items with a linear search would
+have a worst-case of 1,000,000 iterations, whereas the worst case for a binary
+search of 1,000,000 elements is about 20 iterations.  In fact, if many lookups
+will be performed on a seldom-changed list, the savings of O(log n) lookups may
+outweigh the cost of sorting or performing occasional linear time inserts.
 
 
 =head1 EXPORT
 
-Nothing is exported by default.  Upon request will export C<binsearch>,
-C<binsearch_pos>, and C<binsearch_range>.
+Nothing is exported by default.  C<binsearch>, C<binsearch_pos>, and
+C<binsearch_range> may be exported by listing them on the export list.
 
 Or import all functions by specifying C<:all>.
 
@@ -491,13 +492,16 @@ In this regard, the callback is unlike C<sort>, because C<sort> is always
 comparing to elements, whereas C<binsearch> is comparing a target with an
 element.
 
+Just as with C<sort>, the comparator must return -1, 0, or 1 to signify "less
+than", "equal to", or "greater than".
+
 =head2 DEPRECATED FUNCTIONS
 
-The following have been deprecated and should not be used.  They will be
-eliminated in a future version of L<List::BinarySearch>.  The reason for their
-deprecation is that List::BinarySearch::XS provides enough performance gain as
-to make numeric-specialized and string-specialized versions of the binary search
-routine obsolete.  If you need high performance, install List::BinarySearch::XS.
+B<The following have been deprecated and should not be used.>  They will be
+eliminated in a near-future version of L<List::BinarySearch>.  The companion
+module, L<List::BinarySearch::XS> provides enough performance gain as to render
+numeric-specialized and string-specialized versions of the binary search routine
+obsolete.  If you need high performance, install List::BinarySearch::XS.
 
 =head3 bsearch_custom
 
@@ -604,23 +608,33 @@ C<$ENV{List_BinarySearch_PP}> to a true value will prevent the XS module from
 being used by L<List::BinarySearch>.  This setting will have no effect on users
 who use List::BinarySearch::XS directly.
 
-For the sake of code portability, it's recommended to use List::BinarySearch, as
-it will automatically and portably downgrade to the pure-Perl version if the
-XS module can't be loaded.
+For the sake of code portability, it's recommended to use List::BinarySearch as
+the front-end, as it will automatically and portably downgrade to the pure-Perl
+version if the XS module can't be loaded.
+
 
 =head1 DEPENDENCIES
 
 This module uses L<Exporter|Exporter>, and automatically makes use of
 L<List::BinarySearch::XS> if it's installed on the user's system.
 
-This module is tested on Perl 5.8 and newer.  It may also be compatible with
-Perl 5.6 in its pure-Perl form, but hasn't been tested in that environment.
-
+This module should support Perl versions 5.6 and newer in its pure-Perl form.
+The optional XS extension can only be installed on Perl 5.8 or newer.
 
 
 =head1 INCOMPATIBILITIES
 
 The XS plugin for this module is not compatible with Perl 5.6.
+
+
+=head1 DIAGNOSTICS
+
+
+=head1 SEE ALSO
+
+L<List::BinarySearch::XS>: An XS plugin for this module; install it, and this
+module will use it automatically for a nice performance improvement.  May also
+be used on its own.
 
 =head1 AUTHOR
 
@@ -630,18 +644,13 @@ If the documentation fails to answer your question, or if you have a comment
 or suggestion, send me an email.
 
 
-
-=head1 DIAGNOSTICS
-
-
-
 =head1 BUGS AND LIMITATIONS
 
 Please report any bugs or feature requests to
 C<bug-list-binarysearch at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=List-BinarySearch>.  I will
-be notified, and then you'll automatically be notified of progress on your bug
-as I make changes.
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=List-BinarySearch>.  I will be
+notified, and then you'll automatically be notified of progress on your bug as I
+make changes.
 
 
 
@@ -682,9 +691,8 @@ L<http://search.cpan.org/dist/List-BinarySearch/>
 
 =head1 ACKNOWLEDGEMENTS
 
-Thank-you to L<Max Maischein|http://search.cpan.org/~corion/> (Corion) for
-being a willing and helpful sounding board on API issues, and for spotting
-some POD problems.
+Thank-you to those who provided advice on user interface and XS
+interoperability.
 
 L<Mastering Algorithms with Perl|http://shop.oreilly.com/product/9781565923980.do>,
 from L<O'Reilly|http://www.oreilly.com>: for the inspiration (and much of the
@@ -693,11 +701,8 @@ binary search was first documented in 1946 but the first algorithm that worked
 for all sizes of array was not published until 1962.>" (A summary of a passage
 from Knuth: Sorting and Searching, 6.2.1.)
 
-I<Necessity, who is the mother of invention.> -- plato.
-
 I<Although the basic idea of binary search is comparatively straightforward,
 the details can be surprisingly tricky...>  -- Donald Knuth
-
 
 
 =head1 LICENSE AND COPYRIGHT

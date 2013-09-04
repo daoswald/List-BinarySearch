@@ -13,7 +13,7 @@ WriteMakefile(
     VERSION_FROM       => 'lib/List/BinarySearch.pm',
     ABSTRACT_FROM      => 'lib/List/BinarySearch.pm',
     LICENSE            => 'perl',
-    MIN_PERL_VERSION   => '5.008000',
+    MIN_PERL_VERSION   => '5.006000',
     PL_FILES           => {},
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '6.62',    # Core, but updated version.
