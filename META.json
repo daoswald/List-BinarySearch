@@ -34,7 +34,7 @@
       "runtime" : {
          "requires" : {
             "Scalar::Util" : "0",
-            "perl" : "5.008000"
+            "perl" : "5.006000"
          }
       }
    },
@@ -49,5 +49,5 @@
       }
    },
    "release_status" : "testing",
-   "version" : "0.11_002"
+   "version" : "0.11_003"
 }
