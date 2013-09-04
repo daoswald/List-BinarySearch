@@ -2,7 +2,7 @@
 
 package List::BinarySearch::PP;
 
-use 5.006000
+use 5.006000;
 
 use strict;
 use warnings;
