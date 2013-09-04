@@ -6,13 +6,14 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 ## no critic (may require interpolation)
+
 WriteMakefile(
     NAME               => 'List::BinarySearch',
     AUTHOR             => q{David Oswald <davido [@at] cpan [d.o.t] org>},
     VERSION_FROM       => 'lib/List/BinarySearch.pm',
     ABSTRACT_FROM      => 'lib/List/BinarySearch.pm',
     LICENSE            => 'perl',
-    MIN_PERL_VERSION   => '5.006000',
+    MIN_PERL_VERSION   => '5.008000',
     PL_FILES           => {},
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '6.62',    # Core, but updated version.
@@ -28,7 +29,11 @@ WriteMakefile(
         provides => {
             'List::BinarySearch' => {
                 file    => 'lib/List/BinarySearch.pm',
-                version => '0.11_001'
+                version => '0.11_002',
+            },
+            'List::BinarySearch::PP' => {
+                file    => 'lib/List/BinarySearch/PP.pm',
+                version => '0.11_002',
             },
         },
     },

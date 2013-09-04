@@ -4,6 +4,11 @@ use strict;
 use warnings;
 use Test::More;
 
+BEGIN {
+  # Force pure-Perl testing.
+  $ENV{List_BinarySearch_PP} = 1; ## no critic (local)
+}
+
 use List::BinarySearch qw( :all );
 
 my @integers    = ( 100, 200, 300, 400, 500 );
@@ -18,7 +23,7 @@ subtest
             "bsearch_num_pos:    Found at position 0."
         );
         is(
-            bsearch_custom_pos( sub{ $_[0] <=> $_[1] }, 100, @integers ), 0,
+            binsearch_pos( sub{ $a <=> $b }, 100, @integers ), 0,
             "bsearch_custom_pos: Found at position 0."
         );
         is(
@@ -37,7 +42,7 @@ subtest
             bsearch_num_pos( 500, @integers ), 4,
             "bsearch_num_pos: Found at last position."
         );
-        is( bsearch_custom_pos( sub{ $_[0] <=> $_[1] }, 500, @integers ), 4,
+        is( binsearch_pos( sub{ $a <=> $b }, 500, @integers ), 4,
             "bsearch_custom_pos: Found at last position."
         );
         is(
@@ -78,7 +83,7 @@ subtest
             "bsearch_str_pos: Insert after last position."
         );
         is(
-            bsearch_custom_pos( sub{ $_[0] cmp $_[1] }, 'zebra', @strings ),
+            binsearch_pos( sub{ $a cmp $b }, 'zebra', @strings ),
             5, "bsearch_custom_pos: Insert after last position."
         );
         done_testing();
@@ -98,11 +103,11 @@ subtest "Test range functions." => sub {
     ( $low, $high ) = bsearch_num_range( 100, 300, @integers );
     is( $low,  0, "bsearch_num_range: Numeric low."  );
     is( $high, 2, "bsearch_num_range: Numeric high." );
-    ( $low, $high ) = bsearch_custom_range( 
-		sub { $_[0] cmp $_[1] }, 'ape', 'bear', @strings );
-	is( $low,  0, "bsearch_custom_range: Found low at 0." );
-	is( $high, 2, "bsearch_custom_range: Found high at 2." );
-	
+    ( $low, $high )
+      = ( binsearch_range { $a cmp $b }  'bat', 'cat', @strings );
+  is( $low,  1, "bsearch_custom_range: Found low at 1." );
+  is( $high, 3, "bsearch_custom_range: Found high at 3." );
+  
     done_testing();
 };
 

@@ -4,8 +4,6 @@ use strict;
 use warnings;
 
 use Test::More tests => 1;
-use Config;
-
 
 sub prereq_message {
     return "*** YOU MUST INSTALL $_[0] BEFORE PROCEEDING ***\n";

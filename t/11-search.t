@@ -4,6 +4,11 @@ use strict;
 use warnings;
 use Test::More;
 
+BEGIN{
+  # Force pure-Perl testing.
+  $ENV{List_BinarySearch_PP} = 1; ## no critic (local)
+}
+
 use List::BinarySearch qw( :all );
 
 local( $a, $b ) = ( $a, $b );
@@ -28,10 +33,7 @@ subtest "Numeric comparator tests (odd-length list)." => sub {
             "bsearch_num:                Integer ($integers[$ix]) "
                 . "found in position ($ix)."
         );
-        is( bsearch_custom(
-                sub { $_[0] <=> $_[1] },
-                $integers[$ix], @integers
-            ),
+        is( bsearch_custom( sub { $a <=> $b }, $integers[$ix], @integers ),
             $ix,
             "bsearch_custom:           Integer ($integers[$ix]) "
                 . "found in position ($ix)."
@@ -48,10 +50,7 @@ subtest "Numeric comparator tests (odd-length list)." => sub {
 subtest "Even length list tests." => sub {
     plan tests => 16;
     for my $ix ( 0 .. $#even_length ) {
-        is( bsearch_custom(
-                sub { $_[0] <=> $_[1] },
-                $even_length[$ix], @even_length
-            ),
+        is( bsearch_custom( sub { $a <=> $b }, $even_length[$ix], @even_length ),
             $ix,
             "bsearch_custom:           Even-list: ($even_length[$ix])"
                 . " found at index ($ix)."
@@ -65,7 +64,7 @@ subtest "Even length list tests." => sub {
                 . " found at index ($ix)."
         );
     }
-    is( bsearch_custom( sub { $_[0] <=> $_[1] }, 700, @even_length ),
+    is( bsearch_custom( sub { $a <=> $b }, 700, @even_length ),
         undef,
         "bsearch_custom:           undef returned in scalar "
             . "context if no numeric match."
@@ -75,7 +74,7 @@ subtest "Even length list tests." => sub {
         "bsearch_transform: undef returned in scalar "
             . "context if no numeric match."
     );
-    my @array = bsearch_custom( sub { $_[0] <=> $_[1] }, 350, @even_length );
+    my @array = bsearch_custom( sub { $a <=> $b }, 350, @even_length );
     is( scalar @array,
         0,
         "bsearch_custom:           Empty list returned in list context "
@@ -90,12 +89,12 @@ subtest "Even length list tests." => sub {
 
 subtest "Non-unique key tests (stable search guarantee)." => sub {
     plan tests => 6;
-    is( bsearch_custom( sub { $_[0] <=> $_[1] }, 200, @non_unique ),
+    is( bsearch_custom( sub { $a <=> $b }, 200, @non_unique ),
         1,
         "bsearch_custom:           First non-unique key of 200 found at 1." );
     is( bsearch_transform( sub { $_[0] }, 200, @non_unique ),
         1, "bsearch_transform: First non-unique key of 200 found at 1." );
-    is( bsearch_custom( sub { $_[0] <=> $_[1] }, 400, @non_unique ),
+    is( bsearch_custom( sub { $a <=> $b }, 400, @non_unique ),
         3,
         "bsearch_custom:           First occurrence of 400 found at 3 "
             . "(odd index)."
@@ -106,7 +105,7 @@ subtest "Non-unique key tests (stable search guarantee)." => sub {
             . " (odd index)."
     );
 
-    is( bsearch_custom( sub { $_[0] <=> $_[1] }, 500, @non_unique ),
+    is( bsearch_custom( sub { $a <=> $b }, 500, @non_unique ),
         6,
         "bsearch_custom:           First occurrence of 500 found at 6 "
             . "(even index)."
@@ -128,9 +127,7 @@ subtest "String default comparator tests." => sub {
             "bsearch:                    "
                 . "Strings: ($strings[$ix]) found at index ($ix)."
         );
-        is( bsearch_custom(
-                sub { $_[0] cmp $_[1] }, $strings[$ix], @strings
-            ),
+        is( bsearch_custom( sub { $a cmp $b }, $strings[$ix], @strings ),
             $ix,
             "bsearch_custom:           "
                 . "Strings: ($strings[$ix]) found at index ($ix)."
@@ -146,7 +143,7 @@ subtest "String default comparator tests." => sub {
         "bsearch:                    undef returned in scalar "
             . "context for no string match."
     );
-    is( bsearch_custom( sub { $_[0] cmp $_[1] }, 'dave', @strings ),
+    is( bsearch_custom( sub { $a cmp $b }, 'dave', @strings ),
         undef,
         "bsearch_custom:           undef returned in scalar "
             . "context for no string match."
@@ -162,10 +159,7 @@ subtest "String default comparator tests." => sub {
 subtest "Complex data structure testing with custom comparator." => sub {
     plan tests => 12;
     for my $ix ( 0 .. $#data_structs ) {
-        is( bsearch_custom(
-                sub { $_[0] <=> $_[1][0] }, $data_structs[$ix][0],
-                @data_structs
-            ),
+        is( bsearch_custom( sub { $a <=> $b->[0] }, $data_structs[$ix][0], @data_structs ),
             $ix,
             "bsearch_custom:           Custom comparator test for test "
                 . " element $ix."
@@ -180,7 +174,7 @@ subtest "Complex data structure testing with custom comparator." => sub {
                 . "element $ix."
         );
     }
-    is( bsearch_custom( sub { $_[0] <=> $_[1][0] }, 900, @data_structs ),
+    is( bsearch_custom( sub { $a <=> $b->[0] }, 900, @data_structs ),
         undef,
         "bsearch_custom:           undef returned for no match with "
             . "custom comparator."

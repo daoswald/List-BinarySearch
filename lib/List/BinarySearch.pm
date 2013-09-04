@@ -1,4 +1,4 @@
-## no critic (RCS)
+## no critic (RCS,prototypes)
 
 package List::BinarySearch;
 
@@ -9,14 +9,33 @@ use Carp;
 
 use Scalar::Util qw( looks_like_number );
 
+
+BEGIN {
+
+  my @imports = qw( binsearch binsearch_pos );
+
+  # Import XS by default, pure-Perl if XS is unavailable, or if
+  # $ENV{List_BinarySearch_PP} is set.
+  if (
+       $ENV{List_BinarySearch_PP}
+    || ! eval 'use List::BinarySearch::XS @imports; 1;'  ## no critic (eval)
+  ) {
+    eval 'use List::BinarySearch::PP  @imports;';        ## no critic (eval)
+  }
+
+}
+
 require Exporter;
 
 # There is much debate on whether to use base, parent, or manipulate @ISA.
 # The lowest common denominator is what belongs in modules, we'll do @ISA.
 
 our @ISA       = qw(Exporter);    ## no critic (ISA)
+
+# Note: binsearch and binsearch_pos come from List::BinarySearch::PP
 our @EXPORT_OK = qw(
   binsearch         binsearch_pos       binsearch_range
+
   bsearch_str       bsearch_str_pos     bsearch_str_range
   bsearch_num       bsearch_num_pos     bsearch_num_range
   bsearch_custom    bsearch_custom_pos  bsearch_custom_range
@@ -28,9 +47,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-## no critic (prototypes)
-
-our $VERSION = '0.11_001';
+our $VERSION = '0.11_002';
 
 # Needed for developer's releases: See perlmodstyle.
 $VERSION = eval $VERSION;    ## no critic (eval,version)
@@ -84,35 +101,8 @@ sub bsearch_num ($\@) {
       if $max == $min && $target == $aref->[$min];
     return;    # Undef in scalar context, empty list in list context.
 }
-#---------------------------------------------
-# Use a callback for comparisons.
 
 
-sub binsearch (&$\@) {
-    my ( $code, $target, $aref ) = @_;
-    my $min = 0;
-    my $max = $#{$aref};
-    while ( $max > $min ) {
-        my $mid = int( ( $min + $max ) / 2 );
-        no strict 'refs'; ## no critic(strict)
-        local ( ${caller() . '::a'}, ${caller() . '::b'} )
-          = ( $target, $aref->[$mid] );                            # Future use.
-        if ( $code->( $target, $aref->[$mid] ) > 0 ) {
-            $min = $mid + 1;
-        }
-        else {
-            $max = $mid;
-        }
-    }
-    {
-      no strict 'refs'; ## no critic(strict)
-      local ( ${caller() . '::a'}, ${caller() . '::b'} )
-        = ( $target, $aref->[$min] );                              # Future use.
-      return $min
-        if $max == $min && $code->( $target, $aref->[$min] ) == 0;
-    }
-    return;    # Undef in scalar context, empty list in list context.
-}
 
 # DEPRECATED -------------------------------
 sub bsearch_custom(&$\@);
@@ -198,29 +188,6 @@ sub bsearch_num_pos ($\@) {
     return $low;
 }
 
-#------------------------------------------------------
-
-# Identical to bsearch_custom, but upon match-failure returns best insert
-# position for $target.
-
-
-sub binsearch_pos (&$\@) {
-    my ( $comp, $target, $aref ) = @_;
-    my ( $low, $high ) = ( 0, scalar @{$aref} );
-    while ( $low < $high ) {
-        my $cur = int( ( $low + $high ) / 2 );
-        no strict 'refs';  ## no critic(strict)
-        local ( ${ caller() . '::a'}, ${ caller() . '::b'} )
-          = ( $target, $aref->[$cur] );                            # Future use.
-        if ( $comp->( $target, $aref->[$cur] ) > 0 ) {
-            $low = $cur + 1;
-        }
-        else {
-            $high = $cur;
-        }
-    }
-    return $low;
-}
 
 # DEPRECATED --------------------------------------------
 sub bsearch_custom_pos(&$\@);
@@ -244,22 +211,27 @@ sub bsearch_str_range ($$\@) {
 }
 # -----------------------------------------------------
 
+
 sub binsearch_range (&$$\@) {
-	my( $code, $low_target, $high_target, $aref ) = @_;
-	my $index_low  = binsearch_pos( \&$code, $low_target,  @$aref );
-	my $index_high = binsearch_pos( \&$code, $high_target, @$aref );
+  my( $code, $low_target, $high_target, $aref ) = @_;
+  my( $index_low, $index_high );
+
+  # Forward along the caller's $a and $b.
+  local( *a, *b ) = do{
+    no strict 'refs';  ## no critic (strict)
+    my $pkg = caller();
+    ( *{$pkg.'::a'}, *{$pkg.'::b'} );
+  };
+  $index_low  = binsearch_pos( \&$code, $low_target,  @$aref );
+  $index_high = binsearch_pos( \&$code, $high_target, @$aref );
+  local( $a, $b ) = ( $aref->[$index_high], $high_target ); # Use our own.
+  if(  $index_high == scalar @$aref    or    $code->( $a, $b ) > 0  )
   {
-    no strict 'refs'; ## no critic(strict)
-    local( ${caller() . '::a'}, ${caller() . '::b'} )
-      = ( $aref->[$index_high], $high_target );                    # Future use.
-    if(    $index_high == scalar @$aref
-        or $code->( $aref->[$index_high], $high_target ) > 0 )
-	  {
-		  $index_high--;
-	  }
+    $index_high--;
   }
-	return ( $index_low, $index_high );
+  return ( $index_low, $index_high );
 }
+
 
 # DEPRECATED -------------------------------------------
 sub bsearch_custom_range(&$$\@);
@@ -288,11 +260,7 @@ __END__
 
 =head1 NAME
 
-List::BinarySearch - Binary Search a sorted list or array.
-
-=head1 VERSION
-
-Version 0.11_001
+List::BinarySearch - Binary Search within a sorted array.
 
 =head1 SYNOPSIS
 
@@ -372,6 +340,13 @@ gains the guarantee that the element found will always be the lowest-indexed
 element in a range of non-unique keys.
 
 =back
+
+B<< This module has a companion "XS" module: L<List::BinarySearch::XS> which
+users are strongly encouraged to install as well. >>  If List::BinarySearch::XS
+is also installed, C<binsearch> and C<binsearch_pos> will use XS code.  This
+behavior may be overridden by setting C<$ENV{List_BinarySearch_PP}> to a
+true value.
+
 
 =head1 RATIONALE
 
@@ -618,23 +593,34 @@ L<Unicode::Collate>'s C<< $Collator->cmp($a,$b) >>:
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-This module should run under any Perl from 5.8.0 onward.  There are no special
-environment or configuration concerns to address.  An XS plugin is nearing
-completion, and when it becomes available simply installing it will allow
-L<List::BinarySearch> to silently gain the performance benefit it provides.
+By installing L<List::BinarySearch::XS>, the pure-Perl versions of C<binsearch>
+and C<binsearch_pos> will be automatically replaced with XS versions for
+markedly improved performance.  C<binsearch_range> also benefits from the XS
+plug-in, since internally it makes calls to C<binsearch_pos>.
+
+Users are strongly advised to install L<List::BinarySearch::XS>.  If, after
+installing List::BinarySearch::XS, one wishes to disable the XS plugin, setting
+C<$ENV{List_BinarySearch_PP}> to a true value will prevent the XS module from
+being used by L<List::BinarySearch>.  This setting will have no effect on users
+who use List::BinarySearch::XS directly.
+
+For the sake of code portability, it's recommended to use List::BinarySearch, as
+it will automatically and portably downgrade to the pure-Perl version if the
+XS module can't be loaded.
 
 =head1 DEPENDENCIES
 
-This module uses L<Exporter|Exporter>, and in the near future, will be able to
-automatically make use of L<List::BinarySearch::XS>
+This module uses L<Exporter|Exporter>, and automatically makes use of
+L<List::BinarySearch::XS> if it's installed on the user's system.
+
+This module is tested on Perl 5.8 and newer.  It may also be compatible with
+Perl 5.6 in its pure-Perl form, but hasn't been tested in that environment.
+
 
 
 =head1 INCOMPATIBILITIES
 
-In prepration for use with L<List::BinarySearch::XS>, and due to some breaking
-changes between 5.6 XS and 5.8 XS, this module's minimum Perl version has been
-shifted from Perl 5.6.0 to Perl 5.8.0.  5.8 replaced 5.6 in July 2002.  It's
-time to move on.
+The XS plugin for this module is not compatible with Perl 5.6.
 
 =head1 AUTHOR
 

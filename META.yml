@@ -1,5 +1,5 @@
 ---
-abstract: 'Binary Search a sorted list or array.'
+abstract: 'Binary Search within a sorted array.'
 author:
   - 'David Oswald <davido [@at] cpan [d.o.t] org>'
 build_requires:
@@ -21,8 +21,11 @@ no_index:
 provides:
   List::BinarySearch:
     file: lib/List/BinarySearch.pm
-    version: 0.11_001
+    version: 0.11_002
+  List::BinarySearch::PP:
+    file: lib/List/BinarySearch/PP.pm
+    version: 0.11_002
 requires:
   Scalar::Util: 0
-  perl: 5.006000
-version: 0.11_001
+  perl: 5.008000
+version: 0.11_002

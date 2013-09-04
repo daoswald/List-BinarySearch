@@ -6,6 +6,11 @@ use warnings;
 use Test::More tests => 2;
 
 BEGIN {
+  # Force pure-Perl testing.
+  $ENV{List_BinarySearch_PP} = 1; ## no critic (local)
+}
+
+BEGIN {
     use_ok( 'List::BinarySearch', qw( :all ) )
         || BAIL_OUT();
 }
