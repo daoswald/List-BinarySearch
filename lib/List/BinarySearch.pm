@@ -485,7 +485,7 @@ As an example, consider the following data structure:
 
 A numeric custom comparator for such a data structure would look like this:
 
-    sub{ $a <=> $b[0] }
+    sub{ $a <=> $b->[0] }
 
 In this regard, the callback is unlike C<sort>, because C<sort> is always
 comparing to elements, whereas C<binsearch> is comparing a target with an
