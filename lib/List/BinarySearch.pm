@@ -47,20 +47,21 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-our $VERSION = '0.11_003';
+our $VERSION = '0.12';
 
 # Needed for developer's releases: See perlmodstyle.
-$VERSION = eval $VERSION;    ## no critic (eval,version)
+# $VERSION = eval $VERSION;    ## no critic (eval,version)
 
-# There is a lot of repetition in the code.  This is an intentional means of
+# There is some repetition in the code.  This is an intentional means of
 # favoring a small amount of computational efficiency over concise code by
 # avoiding unnecessary function call overhead.
+
+
+# DEPRECATED -----------------------------------
 
 # Search using stringwise comparisons.  Return an index on success, undef or
 # an empty list (depending on context) upon failure.
 
-
-# DEPRECATED -----------------------------------
 sub bsearch_str ($\@) {
     my( $target, $aref ) = @_;
     my $min = 0;
@@ -364,8 +365,8 @@ textbooks. Furthermore, Bentley's own implementation of binary search,
 published in his 1986 book Programming Pearls, contains an error that remained
 undetected for over twenty years.>
 
-So the answer to the question "Why use a module for this?" is "So that you
-don't have to write, test, and debug your own implementation."
+So to answer the question, you might use a module so that you
+don't have to write, test, and debug your own implementation.
 
 
 B<< Perl has C<grep>, hashes, and other alternatives, right? >>

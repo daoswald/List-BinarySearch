@@ -1,5 +1,18 @@
 Revision history for List::BinarySearch
 
+0.12 2013-09-05
+  - TRANSITIONAL RELEASE
+  - Many of the old functions have been deprecated and should be removed from
+    user code in favor of the new binsearch, binsearch_pos, or binsearch_range
+    functions, which are easier to use, faster, and will cure acne.
+  - POD revisions.
+  - Establish interoperability with List::BinarySearch::XS; Install this
+    module, install List::BinarySearch::XS, and when you use List::BinarSearch
+    it will automatically upgrade to the XS functions for high performance if
+    they're available.
+  - THIS IS YOUR ONLY WARNING: Version 0.20 will remove deprecated functions;
+    see the POD for tips on simple migration to the new syntax.
+
 0.11_003 2013-09-04
   - DEVELOPER'S RELEASE
   - Strengthened language on deprecation of obsolete functions.

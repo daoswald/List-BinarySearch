@@ -17,8 +17,8 @@ our @ISA    = qw(Exporter);    ## no critic (ISA)
 our @EXPORT = qw( binsearch binsearch_pos ); ## no critic (export)
 
 
-our $VERSION = '0.011_003';
-$VERSION = eval $VERSION;  ## no critic (eval)
+our $VERSION = '0.012';
+# $VERSION = eval $VERSION;  ## no critic (eval)
 
 
 
@@ -103,19 +103,23 @@ Examples:
     # Find the lowest index of a matching element, or best insert point.
     $index = binsearch_pos {$a cmp $b} 'Chopin', @{[ qw/ Bach Brahms Mozart/ ]};  # Insert at [2].
     $index = binsearch_pos 60, @{[ 10, 20, 30, 40, 50, 70 ]}; # Insert at [5].
-
-    splice @num_array, $index, 1, 60
-      if( $num_array[$index] != 60 );                         # Insertion at [5]
-
     $index = binsearch_pos { $a <=> $b } 20, @{[ 10, 20, 30 ]}; # Matched at [1]
 
 
 =head1 DESCRIPTION
 
+This module is intended to be used by L<List::BinarySearch>, and shouldn't need
+to be used directly in user-code.
+
 This module provides pure-Perl implementations of the C<binsearch> and
 C<binsearch_pos> functions for use by L<List::BinarySearch>.  Please refer to
 the documentation for L<List::BinarySearch> for a full description of those
-functions.
+functions.  What follows is a very brief overview.
+
+These pure-Perl functions will be overridden by XS code when used via
+L<List::BinarySearch> if L<List::BinarySearch::XS> is installed (recommended).
+The pure-Perl functions exist as a gracefull downgrade in case users aren't
+able to use XS modules.
 
 
 =head1 EXPORT
