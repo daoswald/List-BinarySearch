@@ -1,7 +1,7 @@
 Revision history for List::BinarySearch
 
 0.12 2013-09-05
-  - TRANSITIONAL RELEASE
+  - TRANSITIONAL PUBLIC RELEASE
   - Many of the old functions have been deprecated and should be removed from
     user code in favor of the new binsearch, binsearch_pos, or binsearch_range
     functions, which are easier to use, faster, and will cure acne.
