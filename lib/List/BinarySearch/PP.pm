@@ -17,7 +17,7 @@ our @ISA    = qw(Exporter);    ## no critic (ISA)
 our @EXPORT = qw( binsearch binsearch_pos ); ## no critic (export)
 
 
-our $VERSION = '0.012';
+our $VERSION = '0.13';
 # $VERSION = eval $VERSION;  ## no critic (eval)
 
 
@@ -156,12 +156,13 @@ by code outside of this distribution.
 
 =head1 DEPENDENCIES
 
-Perl 5.6.
+Perl 5.8.
 
 
 =head1 INCOMPATIBILITIES
 
-Perl versions prior to 5.6 aren't officially supported by this distribution.
+Perl versions prior to 5.8 aren't supported by this distribution.  See the
+POD from L<List::BinarySearch> for a more detailed explanation.
 
 
 =head1 AUTHOR

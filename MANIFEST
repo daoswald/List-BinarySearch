@@ -21,4 +21,5 @@ t/12-positional_searches.t
 t/13-pp.t
 t/14-pp-isa.t
 t/15-xs-isa.t
+t/16-coverage.t
 examples/bsearch.pl

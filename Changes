@@ -1,5 +1,13 @@
 Revision history for List::BinarySearch
 
+0.13 2013-09-14
+  - TRANSITIONAL PUBLIC RELEASE -- DEPRECATED FUNCTIONS WILL BE REMOVED SOON!
+  - Minimum Perl version supported is now 5.8.  Earlier Perl versions weren't
+    compatible with this module's use of prototypes.
+  - Additional coverage tests added: 100% branch and 98% conditional coverage
+    of non-deprecated functions. (Don't worry about a single untestable
+    condition in non-critical code.)
+
 0.12 2013-09-05
   - TRANSITIONAL PUBLIC RELEASE
   - Many of the old functions have been deprecated and should be removed from

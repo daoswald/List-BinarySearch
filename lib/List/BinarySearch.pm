@@ -2,7 +2,7 @@
 
 package List::BinarySearch;
 
-use 5.006000;
+use 5.008000;
 use strict;
 use warnings;
 use Carp;
@@ -47,7 +47,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
@@ -619,13 +619,16 @@ version if the XS module can't be loaded.
 This module uses L<Exporter|Exporter>, and automatically makes use of
 L<List::BinarySearch::XS> if it's installed on the user's system.
 
-This module should support Perl versions 5.6 and newer in its pure-Perl form.
-The optional XS extension can only be installed on Perl 5.8 or newer.
+This module supports Perl versions 5.8 and newer.
+The optional XS extension also supports Perl 5.8 and newer.
 
 
 =head1 INCOMPATIBILITIES
 
-The XS plugin for this module is not compatible with Perl 5.6.
+This module is incompatible with Perl versions prior to 5.8.  In particular,
+its use of prototypes isn't compatible with Perl 5.6 or older.  It would be
+easy to eliminate the use of prototypes, but doing so would change calling
+syntax.
 
 
 =head1 DIAGNOSTICS
