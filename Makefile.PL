@@ -26,7 +26,15 @@ WriteMakefile(
         'Scalar::Util' => '0',              # Core: Being explicit.
     },
     META_MERGE => {
-        provides => {
+        'meta-spec'   => { version => 2 },
+        resources     => {
+            repository => {
+                type  => 'git',
+                url   => 'https://github.com/daoswald/List-BinarySearch.git',
+                web   => 'https://github.com/daoswald/List-BinarySearch',
+            },
+        },
+        provides      => {
             'List::BinarySearch' => {
                 file    => 'lib/List/BinarySearch.pm',
                 version => '0.13',

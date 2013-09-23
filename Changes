@@ -1,5 +1,8 @@
 Revision history for List::BinarySearch
 
+0.14 2013-09-23
+  - Added meta spec version and git repo to META information.
+
 0.13 2013-09-17
   - TRANSITIONAL PUBLIC RELEASE -- DEPRECATED FUNCTIONS WILL BE REMOVED SOON!
   - Minimum Perl version supported is now 5.8.  Earlier Perl versions weren't
