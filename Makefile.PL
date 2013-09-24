@@ -13,7 +13,7 @@ my $prereq_pm = {
 
 if( ! eval 'use List::BinarySearch::XS; 1;' ) {
   my $answer = 'n';
-  unless( $ENV{LBS_INSTALL_XS} ) {
+  unless( $ENV{LBS_NO_XS} ) {
     $answer =
       prompt <<'EOP' . 'Would you like to install List::BinarySearch::XS?', 'y';
 
