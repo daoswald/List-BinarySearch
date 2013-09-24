@@ -79,6 +79,9 @@ WriteMakefile(
                 version => '0.13',
             },
         },
+        recommends    => {
+            'List::BinarySearch::XS' => '0',
+        },
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES    => 'List-BinarySearch-*' },
