@@ -5,7 +5,44 @@ use warnings;
 
 use ExtUtils::MakeMaker;
 
-## no critic (may require interpolation)
+## no critic (may require interpolation eval)
+
+my $prereq_pm = {
+  'Scalar::Util' => '0',
+};
+
+if( ! eval 'use List::BinarySearch::XS; 1;' ) {
+  my $answer = 'n';
+  unless( $ENV{LBS_INSTALL_XS} ) {
+    $answer =
+      prompt <<'EOP' . 'Would you like to install List::BinarySearch::XS?', 'y';
+
+List::BinarySearch::XS is not installed.
+
+This module will provide a performance improvement.  Though it is not required
+for proper operation, it is strongly recommended that this module be installed
+unless the target environment is unable to compile XS modules.
+
+Answering 'yes' to the following question will cause most CPAN installers to
+pull in the List::BinarySearch::XS module automatically.  If you are doing a
+manual installation you will probably need to install List::BinarySearch::XS
+separately.
+
+EOP
+  }
+  if( $answer =~ m/^y/i ) {
+    $prereq_pm->{'List::BinarySearch::XS'} = '0'; # Add List::BinarySearch::XS
+                                                  # to our list of dependencies.
+    print "List::BinarySearch::XS has been added to the dependency list.\n";
+  }
+  else {
+    print "List::BinarySearch::XS will not be added to the dependency list.\n";
+  }
+}
+else {
+  print "List::BinarySearch::XS has been detected. It will be used automatically.\n";
+}
+
 
 WriteMakefile(
     NAME               => 'List::BinarySearch',
@@ -22,9 +59,7 @@ WriteMakefile(
         'Test::More' => '0.98',             # Core, but updated version.
         'English'    => '0',                # Core.
     },
-    PREREQ_PM => {
-        'Scalar::Util' => '0',              # Core: Being explicit.
-    },
+    PREREQ_PM => $prereq_pm,
     META_MERGE => {
         'meta-spec'   => { version => 2 },
         resources     => {
