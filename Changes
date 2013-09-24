@@ -1,7 +1,13 @@
 Revision history for List::BinarySearch
 
-0.14 2013-09-23
+0.14 2013-09-24
   - Added meta spec version and git repo to META information.
+  - Updated examples/bsearch.pl to use binsearch
+  - Makefile.PL prompts to add List::BinarySearch::XS dependency.
+    (In non-interactive environment, this defaults to yes.)
+    See POD for additional configuration information.
+  - META_MERGE => recommends => List::BinarySearch::XS, for those clients
+    that understand the 'recommends' semantics from META spec 2.0.
 
 0.13 2013-09-17
   - TRANSITIONAL PUBLIC RELEASE -- DEPRECATED FUNCTIONS WILL BE REMOVED SOON!

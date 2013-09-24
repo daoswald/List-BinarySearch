@@ -47,10 +47,10 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-our $VERSION = '0.13';
+our $VERSION = '0.13_001';
 
 # Needed for developer's releases: See perlmodstyle.
-# $VERSION = eval $VERSION;    ## no critic (eval,version)
+$VERSION = eval $VERSION;    ## no critic (eval,version)
 
 # There is some repetition in the code.  This is an intentional means of
 # favoring a small amount of computational efficiency over concise code by
@@ -348,7 +348,8 @@ B<< This module has a companion "XS" module: L<List::BinarySearch::XS> which
 users are strongly encouraged to install as well. >>  If List::BinarySearch::XS
 is also installed, C<binsearch> and C<binsearch_pos> will use XS code.  This
 behavior may be overridden by setting C<$ENV{List_BinarySearch_PP}> to a
-true value.
+true value.  Most CPAN installers will either automatically install the XS
+module, or prompt to automatically install it.  See CONFIGURATION for details.
 
 
 =head1 RATIONALE
@@ -598,6 +599,18 @@ L<Unicode::Collate>'s C<< $Collator->cmp($a,$b) >>:
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
+Most CPAN installers will automatically pull in and install the XS plugin 
+for this module.  If in interactive mode, they will prompt first. To override 
+default behavior, forcing CPAN installers to I<not> pull in the XS module, 
+set the environment variable LBS_NO_XS true prior to installation.  There
+will be no prompt, and the XS module won't be pulled in and installed.
+However, the List::BinarySearch::XS plugin is strongly recommended, and should
+only be skipped in environments where XS modules cannot be compiled.
+
+There is nothing special about this process; if one wishes to install the XS
+module beforhand, or at any time later on, just installing it in the usual
+fashion is sufficient for List::BinarySearch to recognize and start using it.
+
 By installing L<List::BinarySearch::XS>, the pure-Perl versions of C<binsearch>
 and C<binsearch_pos> will be automatically replaced with XS versions for
 markedly improved performance.  C<binsearch_range> also benefits from the XS
@@ -609,15 +622,19 @@ C<$ENV{List_BinarySearch_PP}> to a true value will prevent the XS module from
 being used by L<List::BinarySearch>.  This setting will have no effect on users
 who use List::BinarySearch::XS directly.
 
-For the sake of code portability, it's recommended to use List::BinarySearch as
-the front-end, as it will automatically and portably downgrade to the pure-Perl
-version if the XS module can't be loaded.
+For the sake of code portability, it is recommended to use List::BinarySearch 
+as the front-end, as it will automatically and portably downgrade to the 
+pure-Perl version if the XS module can't be loaded.
 
 
 =head1 DEPENDENCIES
 
 This module uses L<Exporter|Exporter>, and automatically makes use of
 L<List::BinarySearch::XS> if it's installed on the user's system.
+
+This module will attempt to install List::BinarySearch::XS unless
+LBS_NO_XS is set prior to install, or in interactive mode, the user
+opts to skip this recommended step.
 
 This module supports Perl versions 5.8 and newer.
 The optional XS extension also supports Perl 5.8 and newer.
