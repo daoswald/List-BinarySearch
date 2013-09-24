@@ -1,6 +1,7 @@
 Revision history for List::BinarySearch
 
-0.14 2013-09-24
+0.13_001 2013-09-24
+  - DEVELOPERS RELEASE -- Testing Makefile's optional dependency code.
   - Added meta spec version and git repo to META information.
   - Updated examples/bsearch.pl to use binsearch
   - Makefile.PL prompts to add List::BinarySearch::XS dependency.
