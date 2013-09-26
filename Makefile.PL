@@ -72,15 +72,19 @@ WriteMakefile(
         provides      => {
             'List::BinarySearch' => {
                 file    => 'lib/List/BinarySearch.pm',
-                version => '0.13',
+                version => '0.14',
             },
             'List::BinarySearch::PP' => {
                 file    => 'lib/List/BinarySearch/PP.pm',
-                version => '0.13',
+                version => '0.14',
             },
         },
-        recommends    => {
-            'List::BinarySearch::XS' => '0',
+        prereqs => {
+            runtime => {
+                recommends    => {
+                    'List::BinarySearch::XS' => '0.04',
+                },
+            },
         },
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

@@ -1,5 +1,13 @@
 Revision history for List::BinarySearch
 
+0.14 2013-09-26
+  - NEW API IS NOW STABLE: DEPRECATED FUNCTIONS HAVE BEEN REMOVED.
+  - List::BinarySearch::XS will now be used as an optional default dependency.
+  - In interactive mode, CPAN installers will prompt for permission to use this
+    dependency.  Default action is yes.
+  - Set LBS_NO_XS to prevent installing the XS module, or answer 'no' in
+    installer's interactive mode.
+
 0.13_001 2013-09-24
   - DEVELOPERS RELEASE -- Testing Makefile's optional dependency code.
   - Added meta spec version and git repo to META information.
