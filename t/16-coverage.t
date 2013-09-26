@@ -20,5 +20,11 @@ is(
   'binsearch_range: Correct range when upper bound is in-bounds but not found.'
 );
 
+is(
+  ( List::BinarySearch::binsearch { $a <=> $b } 250, @{[100]} ),
+  undef,
+  'binsearch: Match in range but not found.'
+);
+
 
 done_testing();

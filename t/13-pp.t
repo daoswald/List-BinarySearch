@@ -29,8 +29,13 @@ is( ( binsearch { $a <=> $b } 5, @{[0,1,2,3,4,5,6]} ), 5,
   'binsearch: Found an item.'
 );
 
+
 is( ( binsearch { $a <=> $b } -1, @{[0,1,2,3,4,5,6]} ), undef,
   'binsearch: Found undef.'
+);
+
+is( ( binsearch { $a <=> $b } 2, @{[0,1, ,3,4,5,6]} ), undef,
+  'binsearch: Found undef again.'
 );
 
 is( ( binsearch_pos { $a <=> $b } 2, @{[0,1,2,3,4,5,6]} ), 2,

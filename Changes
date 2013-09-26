@@ -7,6 +7,7 @@ Revision history for List::BinarySearch
     dependency.  Default action is yes.
   - Set LBS_NO_XS to prevent installing the XS module, or answer 'no' in
     installer's interactive mode.
+  - Test coverage is now 100%.
 
 0.13_001 2013-09-24
   - DEVELOPERS RELEASE -- Testing Makefile's optional dependency code.

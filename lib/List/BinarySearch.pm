@@ -16,6 +16,9 @@ BEGIN {
 
   # Import XS by default, pure-Perl if XS is unavailable, or if
   # $ENV{List_BinarySearch_PP} is set.
+
+  # This conditional has been tested manually.  Can't be automatically tested.
+  # uncoverable condition right false
   if (
        $ENV{List_BinarySearch_PP}
     || ! eval 'use List::BinarySearch::XS @imports; 1;'  ## no critic (eval)
