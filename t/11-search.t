@@ -26,21 +26,11 @@ my @data_structs = (
 );
 
 subtest "Numeric comparator tests (odd-length list)." => sub {
-    plan tests => 15;
+    plan tests => 5;
     for my $ix ( 0 .. $#integers ) {
-        is( bsearch_num( $integers[$ix], @integers ),
+        is( binsearch( sub { $a <=> $b }, $integers[$ix], @integers ),
             $ix,
-            "bsearch_num:                Integer ($integers[$ix]) "
-                . "found in position ($ix)."
-        );
-        is( bsearch_custom( sub { $a <=> $b }, $integers[$ix], @integers ),
-            $ix,
-            "bsearch_custom:           Integer ($integers[$ix]) "
-                . "found in position ($ix)."
-        );
-        is( bsearch_transform( sub { $_[0] }, $integers[$ix], @integers ),
-            $ix,
-            "bsearch_transform: Integer ($integers[$ix]) "
+            "binsearch:           Integer ($integers[$ix]) "
                 . "found in position ($ix)."
         );
     }
@@ -48,71 +38,42 @@ subtest "Numeric comparator tests (odd-length list)." => sub {
 };
 
 subtest "Even length list tests." => sub {
-    plan tests => 16;
+    plan tests => 8;
     for my $ix ( 0 .. $#even_length ) {
-        is( bsearch_custom( sub { $a <=> $b }, $even_length[$ix], @even_length ),
+        is( binsearch( sub { $a <=> $b }, $even_length[$ix], @even_length ),
             $ix,
-            "bsearch_custom:           Even-list: ($even_length[$ix])"
-                . " found at index ($ix)."
-        );
-        is( bsearch_transform(
-                sub { $_[0] },
-                $even_length[$ix], @even_length
-            ),
-            $ix,
-            "bsearch_transform: Even-list: ($even_length[$ix])"
+            "binsearch:           Even-list: ($even_length[$ix])"
                 . " found at index ($ix)."
         );
     }
-    is( bsearch_custom( sub { $a <=> $b }, 700, @even_length ),
+    is( binsearch( sub { $a <=> $b }, 700, @even_length ),
         undef,
-        "bsearch_custom:           undef returned in scalar "
+        "binsearch:           undef returned in scalar "
             . "context if no numeric match."
     );
-    is( bsearch_transform( sub { $_[0] }, 700, @even_length ),
-        undef,
-        "bsearch_transform: undef returned in scalar "
-            . "context if no numeric match."
-    );
-    my @array = bsearch_custom( sub { $a <=> $b }, 350, @even_length );
+    my @array = binsearch( sub { $a <=> $b }, 350, @even_length );
     is( scalar @array,
         0,
-        "bsearch_custom:           Empty list returned in list context "
+        "binsearch:           Empty list returned in list context "
             . "if no numeric match."
     );
-    @array = bsearch_transform( sub { $_[0] }, 350, @even_length );
-    is( scalar(@array), 0,
-              "bsearch_transform: Empty list returned in list contect "
-            . "if no numberic match." );
     done_testing();
 };
 
 subtest "Non-unique key tests (stable search guarantee)." => sub {
-    plan tests => 6;
-    is( bsearch_custom( sub { $a <=> $b }, 200, @non_unique ),
+    plan tests => 3;
+    is( binsearch( sub { $a <=> $b }, 200, @non_unique ),
         1,
-        "bsearch_custom:           First non-unique key of 200 found at 1." );
-    is( bsearch_transform( sub { $_[0] }, 200, @non_unique ),
-        1, "bsearch_transform: First non-unique key of 200 found at 1." );
-    is( bsearch_custom( sub { $a <=> $b }, 400, @non_unique ),
+        "binsearch:           First non-unique key of 200 found at 1." );
+    is( binsearch( sub { $a <=> $b }, 400, @non_unique ),
         3,
-        "bsearch_custom:           First occurrence of 400 found at 3 "
+        "binsearch:           First occurrence of 400 found at 3 "
             . "(odd index)."
     );
-    is( bsearch_transform( sub { $_[0] }, 400, @non_unique ),
-        3,
-        "bsearch_transform: First occurrence of 400 found at 3 "
-            . " (odd index)."
-    );
 
-    is( bsearch_custom( sub { $a <=> $b }, 500, @non_unique ),
+    is( binsearch( sub { $a <=> $b }, 500, @non_unique ),
         6,
-        "bsearch_custom:           First occurrence of 500 found at 6 "
-            . "(even index)."
-    );
-    is( bsearch_transform( sub { $_[0] }, 500, @non_unique ),
-        6,
-        "bsearch_transform: First occurrence of 500 found at 6 "
+        "binsearch:           First occurrence of 500 found at 6 "
             . "(even index)."
     );
 
@@ -120,69 +81,35 @@ subtest "Non-unique key tests (stable search guarantee)." => sub {
 };
 
 subtest "String default comparator tests." => sub {
-    plan tests => 18;
+    plan tests => 6;
     for my $ix ( 0 .. $#strings ) {
-        is( bsearch_str( $strings[$ix], @strings ),
+        is( binsearch( sub { $a cmp $b }, $strings[$ix], @strings ),
             $ix,
-            "bsearch:                    "
-                . "Strings: ($strings[$ix]) found at index ($ix)."
-        );
-        is( bsearch_custom( sub { $a cmp $b }, $strings[$ix], @strings ),
-            $ix,
-            "bsearch_custom:           "
-                . "Strings: ($strings[$ix]) found at index ($ix)."
-        );
-        is( bsearch_transform( sub { $_[0] }, $strings[$ix], @strings ),
-            $ix,
-            "bsearch_transform: "
+            "binsearch:           "
                 . "Strings: ($strings[$ix]) found at index ($ix)."
         );
     }
-    is( bsearch_str( 'dave', @strings ),
+    is( binsearch( sub { $a cmp $b }, 'dave', @strings ),
         undef,
-        "bsearch:                    undef returned in scalar "
-            . "context for no string match."
-    );
-    is( bsearch_custom( sub { $a cmp $b }, 'dave', @strings ),
-        undef,
-        "bsearch_custom:           undef returned in scalar "
-            . "context for no string match."
-    );
-    is( bsearch_transform( sub { $_[0] }, 'dave', @strings ),
-        undef,
-        "bsearch_transform: undef returned in scalar "
+        "binsearch:           undef returned in scalar "
             . "context for no string match."
     );
     done_testing();
 };
 
 subtest "Complex data structure testing with custom comparator." => sub {
-    plan tests => 12;
+    plan tests => 6;
     for my $ix ( 0 .. $#data_structs ) {
-        is( bsearch_custom( sub { $a <=> $b->[0] }, $data_structs[$ix][0], @data_structs ),
+        is( binsearch( sub { $a <=> $b->[0] }, $data_structs[$ix][0], @data_structs ),
             $ix,
-            "bsearch_custom:           Custom comparator test for test "
+            "binsearch:           Custom comparator test for test "
                 . " element $ix."
         );
-        is( bsearch_transform(
-                sub { $_[0][0] },
-                $data_structs[$ix][0],
-                @data_structs
-            ),
-            $ix,
-            "bsearch_transform: Custom transformer test for test "
-                . "element $ix."
-        );
     }
-    is( bsearch_custom( sub { $a <=> $b->[0] }, 900, @data_structs ),
+    is( binsearch( sub { $a <=> $b->[0] }, 900, @data_structs ),
         undef,
-        "bsearch_custom:           undef returned for no match with "
+        "binsearch:           undef returned for no match with "
             . "custom comparator."
-    );
-    is( bsearch_transform( sub { $_[0][0] }, 900, @data_structs ),
-        undef,
-        "bsearch_transform: undef returned for no match with "
-            . "custom transformer."
     );
     done_testing();
 };
