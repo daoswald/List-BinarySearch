@@ -17,7 +17,7 @@ our @ISA    = qw(Exporter);    ## no critic (ISA)
 our @EXPORT = qw( binsearch binsearch_pos ); ## no critic (export)
 
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 # $VERSION = eval $VERSION;  ## no critic (eval)
 
 
@@ -45,9 +45,7 @@ sub binsearch (&$\@) {
       no strict 'refs'; ## no critic(strict)
       local ( ${caller() . '::a'}, ${caller() . '::b'} )
         = ( $target, $aref->[$min] );
-      # uncoverable condition left false ($max always == $min)
-      return $min
-        if $max == $min && $code->( $target, $aref->[$min] ) == 0;
+      return $min if $code->( $target, $aref->[$min] ) == 0;
     }
     return;    # Undef in scalar context, empty list in list context.
 }

@@ -1,10 +1,14 @@
 Revision history for List::BinarySearch
 
+0.15 2013-09-27
+  - Removed unnecessary max==min test in L::BS::PP::binsearch (save a cycle:
+    just an efficiency improvement).
+
 0.14 2013-09-26
   - NEW API IS NOW STABLE: DEPRECATED FUNCTIONS HAVE BEEN REMOVED.
   - List::BinarySearch::XS will now be used as an optional default dependency.
-  - In interactive mode, CPAN installers will prompt for permission to use this
-    dependency.  Default action is yes.
+  - In interactive mode, CPAN installers will prompt for permission to use 
+    this dependency.  Default action is yes.
   - Set LBS_NO_XS to prevent installing the XS module, or answer 'no' in
     installer's interactive mode.
   - Test coverage is now 100%.

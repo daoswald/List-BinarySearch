@@ -72,11 +72,11 @@ WriteMakefile(
         provides      => {
             'List::BinarySearch' => {
                 file    => 'lib/List/BinarySearch.pm',
-                version => '0.14',
+                version => '0.15',
             },
             'List::BinarySearch::PP' => {
                 file    => 'lib/List/BinarySearch/PP.pm',
-                version => '0.14',
+                version => '0.15',
             },
         },
         prereqs => {
