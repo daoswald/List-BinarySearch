@@ -43,7 +43,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
@@ -113,7 +113,7 @@ Examples:
     $index = binsearch_pos {$a cmp $b} 'Chopin', @str_array;  # Insert at [3].
     $index = binsearch_pos 600, @num_array;                   # Insert at [5].
 
-    splice @num_array, $index, 1, 600
+    splice @num_array, $index, 0, 600
       if( $num_array[$index] != 600 );                        # Insertion at [5]
 
     $index = binsearch_pos { $a <=> $b } 200, @num_array;     # Matched at [1].

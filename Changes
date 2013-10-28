@@ -1,5 +1,8 @@
 Revision history for List::BinarySearch
 
+0.16 2013-10-28
+  - Fixed POD typo (bug in example).
+
 0.15 2013-09-27
   - Removed unnecessary max==min test in L::BS::PP::binsearch (save a cycle:
     just an efficiency improvement).
