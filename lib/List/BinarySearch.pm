@@ -43,10 +43,25 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
+
+
+# Custom import() to touch $a and $b in Perl version < 5.20, to eliminate
+# "used only once" warnings.
+sub import
+{
+  my $pkg = caller;
+
+  if( $] < 5.020 ) {
+    no strict 'refs';  ## no critic(strict)
+    ${"${pkg}::a"} = ${"${pkg}::a"};
+    ${"${pkg}::b"} = ${"${pkg}::b"};
+  }
+  goto &Exporter::import;
+}
 
 
 
@@ -323,8 +338,7 @@ than", "equal to", or "greater than".
 =head1 DATA SET REQUIREMENTS
 
 A well written general algorithm should place as few demands on its data as
-practical.  The three requirements that these Binary Search algorithms impose
-are:
+practical.  The requirements that these Binary Search algorithms impose are:
 
 =over 4
 
@@ -433,8 +447,8 @@ be used on its own.
 
 David Oswald, C<< <davido at cpan.org> >>
 
-If the documentation fails to answer your question, or if you have a comment
-or suggestion, send me an email.
+If the documentation fails to answer a question, or if you have a comment or 
+suggestion, send me an email.
 
 
 =head1 BUGS AND LIMITATIONS

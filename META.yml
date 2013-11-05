@@ -2,9 +2,11 @@
 abstract: 'Binary Search within a sorted array.'
 author:
   - 'David Oswald <davido [@at] cpan [d.o.t] org>'
-build_requires: {}
+build_requires:
+  English: 0
+  Test::More: 0.98
 dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.120921'
+generated_by: 'ExtUtils::MakeMaker version 6.78, CPAN::Meta::Converter version 2.132140'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -23,6 +25,9 @@ provides:
     version: 0.16
 recommends:
   List::BinarySearch::XS: 0.05
+requires:
+  Scalar::Util: 0
+  perl: 5.008000
 resources:
   repository: https://github.com/daoswald/List-BinarySearch.git
-version: 0.16
+version: 0.17

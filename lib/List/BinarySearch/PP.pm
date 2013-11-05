@@ -17,7 +17,7 @@ our @ISA    = qw(Exporter);    ## no critic (ISA)
 our @EXPORT = qw( binsearch binsearch_pos ); ## no critic (export)
 
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 # $VERSION = eval $VERSION;  ## no critic (eval)
 
 

@@ -4,7 +4,7 @@
       "David Oswald <davido [@at] cpan [d.o.t] org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "ExtUtils::MakeMaker version 6.78, CPAN::Meta::Converter version 2.132140",
    "license" : [
       "perl_5"
    ],
@@ -20,9 +20,19 @@
       ]
    },
    "prereqs" : {
+      "build" : {
+         "requires" : {
+            "English" : "0",
+            "Test::More" : "0.98"
+         }
+      },
       "runtime" : {
          "recommends" : {
             "List::BinarySearch::XS" : "0.05"
+         },
+         "requires" : {
+            "Scalar::Util" : "0",
+            "perl" : "5.008000"
          }
       }
    },
@@ -44,5 +54,5 @@
          "web" : "https://github.com/daoswald/List-BinarySearch"
       }
    },
-   "version" : "0.16"
+   "version" : "0.17"
 }
