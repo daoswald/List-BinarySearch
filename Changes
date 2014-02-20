@@ -1,5 +1,8 @@
 Revision history for List::BinarySearch
 
+0.20 2014-02-20
+  - This time really do fix version numbers. ;)
+
 0.18 2014-02-05
   - Fix version numbers.
   
