@@ -1,5 +1,14 @@
 Revision history for List::BinarySearch
 
+0.23 2014-12-01
+  - Remove some diagnostics code.
+
+0.22 2014-12-01
+  - Comment reason why we goto &Exporter::import rather than calling SUPER::.
+  - Make it easier to manage distribution version numbering.
+  - Shift bugs/feature requests from RT to GitHub issues.
+  - Recommend List::BinarySearch::XS v0.06 (was v0.05).
+
 0.21 2014-12-01
   - Improve logic for overriding 'import' on pre-Perl 5.20.
 

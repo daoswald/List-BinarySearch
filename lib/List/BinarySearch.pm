@@ -40,7 +40,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-our $VERSION = '0.21';
+our $VERSION = '0.23';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
@@ -55,6 +55,8 @@ our $VERSION = '0.21';
       no strict 'refs'; ## no critic(strict)
       ${"${pkg}::a"} = ${"${pkg}::a"};
       ${"${pkg}::b"} = ${"${pkg}::b"};
+      # It would feel nicer to call shift->SUPER::import(@_), but 
+      # Exporter::import appears to be too fragile for this type of wrapper.
       goto &Exporter::import;
     };
   }
@@ -451,10 +453,9 @@ suggestion, send me an email.
 =head1 BUGS AND LIMITATIONS
 
 Please report any bugs or feature requests to
-C<bug-list-binarysearch at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=List-BinarySearch>.  I will be
-notified, and then you'll automatically be notified of progress on your bug as I
-make changes.
+L<https://github.com/daoswald/List-BinarySearch/issues>.  I will be
+notified, and then you'll automatically be notified of progress on your bug as
+I make changes.
 
 
 
@@ -473,9 +474,9 @@ information at:
 
 L<http://www.github.com/daoswald/List-BinarySearch>
 
-=item * RT: CPAN's request tracker (report bugs here)
+=item * GitHub Issue tracker (report bugs here)
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=List-BinarySearch>
+L<https://github.com/daoswald/List-BinarySearch/issues>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 

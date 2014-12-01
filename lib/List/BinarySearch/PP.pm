@@ -14,7 +14,7 @@ our @ISA    = qw(Exporter);    ## no critic (ISA)
 our @EXPORT = qw( binsearch binsearch_pos ); ## no critic (export)
 
 
-our $VERSION = '0.21';
+our $VERSION = '0.23';
 # $VERSION = eval $VERSION;  ## no critic (eval)
 
 
@@ -177,8 +177,7 @@ or suggestion, send me an email.
 =head1 BUGS AND LIMITATIONS
 
 Please report any bugs or feature requests to
-C<bug-list-binarysearch at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=List-BinarySearch>.  I will
+L<https://github.com/daoswald/List-BinarySearch/issues>.  I will
 be notified, and then you'll automatically be notified of progress on your bug
 as I make changes.
 
@@ -199,9 +198,9 @@ information at:
 
 L<http://www.github.com/daoswald/List-BinarySearch>
 
-=item * RT: CPAN's request tracker (report bugs here)
+=item * GitHub Issue tracker (report bugs here)
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=List-BinarySearch>
+L<https://github.com/daoswald/List-BinarySearch/issues>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 

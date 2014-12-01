@@ -7,9 +7,9 @@ use ExtUtils::MakeMaker;
 
 ## no critic (may require interpolation eval)
 
-my $prereq_pm = {
-  'Scalar::Util' => '0',
-};
+use constant DIST_VERSION => '0.23';
+
+my $prereq_pm = { 'Scalar::Util' => '0' };
 
 if( ! eval 'use List::BinarySearch::XS; 1;' ) {
   my $answer = 'n';
@@ -63,6 +63,9 @@ WriteMakefile(
     META_MERGE => {
         'meta-spec'   => { version => 2 },
         resources     => {
+            bugtracker => {
+                web => 'https://github.com/daoswald/List-BinarySearch/issues',
+            },
             repository => {
                 type  => 'git',
                 url   => 'https://github.com/daoswald/List-BinarySearch.git',
@@ -72,17 +75,17 @@ WriteMakefile(
         provides      => {
             'List::BinarySearch' => {
                 file    => 'lib/List/BinarySearch.pm',
-                version => '0.21',
+                version => DIST_VERSION,
             },
             'List::BinarySearch::PP' => {
                 file    => 'lib/List/BinarySearch/PP.pm',
-                version => '0.21',
+                version => DIST_VERSION,
             },
         },
         prereqs => {
             runtime => {
                 recommends    => {
-                    'List::BinarySearch::XS' => '0.05',
+                    'List::BinarySearch::XS' => '0.06',
                 },
             },
         },
