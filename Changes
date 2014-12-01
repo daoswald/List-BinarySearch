@@ -1,5 +1,8 @@
 Revision history for List::BinarySearch
 
+0.21 2014-12-01
+  - Improve logic for overriding 'import' on pre-Perl 5.20.
+
 0.20 2014-02-20
   - This time really do fix version numbers. ;)
 

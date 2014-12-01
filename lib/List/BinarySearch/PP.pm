@@ -10,14 +10,11 @@ use Carp;
 
 require Exporter;
 
-# There is much debate on whether to use base, parent, or manipulate @ISA.
-# The lowest common denominator is what belongs in modules, we'll do @ISA.
-
 our @ISA    = qw(Exporter);    ## no critic (ISA)
 our @EXPORT = qw( binsearch binsearch_pos ); ## no critic (export)
 
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 # $VERSION = eval $VERSION;  ## no critic (eval)
 
 

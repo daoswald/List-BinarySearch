@@ -30,9 +30,6 @@ BEGIN {
 
 require Exporter;
 
-# There is much debate on whether to use base, parent, or manipulate @ISA.
-# The lowest common denominator is what belongs in modules, we'll do @ISA.
-
 our @ISA       = qw(Exporter);    ## no critic (ISA)
 
 # Note: binsearch and binsearch_pos come from List::BinarySearch::PP
@@ -43,7 +40,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
@@ -51,16 +48,16 @@ our $VERSION = '0.20';
 
 # Custom import() to touch $a and $b in Perl version < 5.20, to eliminate
 # "used only once" warnings.
-sub import
 {
-  my $pkg = caller;
-
   if( $] < 5.020 ) {
-    no strict 'refs';  ## no critic(strict)
-    ${"${pkg}::a"} = ${"${pkg}::a"};
-    ${"${pkg}::b"} = ${"${pkg}::b"};
+    *import = sub {
+      my $pkg = caller;
+      no strict 'refs'; ## no critic(strict)
+      ${"${pkg}::a"} = ${"${pkg}::a"};
+      ${"${pkg}::b"} = ${"${pkg}::b"};
+      goto &Exporter::import;
+    };
   }
-  goto &Exporter::import;
 }
 
 
