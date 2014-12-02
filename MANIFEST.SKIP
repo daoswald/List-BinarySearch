@@ -19,6 +19,7 @@
 \.old$
 ^#.*#$
 ^\.#
+\.swp$
 
 # Custom skips.
 \.gz$
