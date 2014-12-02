@@ -1,5 +1,11 @@
 Revision history for List::BinarySearch
 
+0.25 2014-12-02
+  - Microoptimization: Cache caller() out of loops. (Part of GH Issue 2).
+  - Improve math to avoid possibility of overflow.
+    (https://en.wikipedia.org/wiki/Binary_search_algorithm#Arithmetic
+    and part of GH issue #2.)
+
 0.24 2014-12-02
   - Fix SYNOPSIS typos in L::BS and L::BS::PP (Closes GH issue #1).
 

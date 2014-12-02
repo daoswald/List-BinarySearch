@@ -40,7 +40,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 # The prototyping gives List::BinarySearch a similar feel to List::Util,
 # and List::MoreUtils.
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 # Needed for developer's releases: See perlmodstyle.
 # $VERSION = eval $VERSION;    ## no critic (eval,version)
