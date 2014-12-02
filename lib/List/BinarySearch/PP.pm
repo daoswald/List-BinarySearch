@@ -14,7 +14,7 @@ our @ISA    = qw(Exporter);    ## no critic (ISA)
 our @EXPORT = qw( binsearch binsearch_pos ); ## no critic (export)
 
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 # $VERSION = eval $VERSION;  ## no critic (eval)
 
 
@@ -100,8 +100,8 @@ Examples:
 
     # Find the lowest index of a matching element, or best insert point.
     $index = binsearch_pos {$a cmp $b} 'Chopin', @{[ qw/ Bach Brahms Mozart/ ]};  # Insert at [2].
-    $index = binsearch_pos 60, @{[ 10, 20, 30, 40, 50, 70 ]}; # Insert at [5].
-    $index = binsearch_pos { $a <=> $b } 20, @{[ 10, 20, 30 ]}; # Matched at [1]
+    $index = binsearch_pos {$a <=> $b} 60, @{[ 10, 20, 30, 40, 50, 70 ]}; # Insert at [5].
+    $index = binsearch_pos {$a <=> $b} 20, @{[ 10, 20, 30 ]}; # Matched at [1]
 
 
 =head1 DESCRIPTION

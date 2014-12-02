@@ -7,7 +7,7 @@ use ExtUtils::MakeMaker;
 
 ## no critic (may require interpolation eval)
 
-use constant DIST_VERSION => '0.23';
+use constant DIST_VERSION => '0.24';
 
 my $prereq_pm = { 'Scalar::Util' => '0' };
 

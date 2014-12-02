@@ -21,10 +21,10 @@ no_index:
 provides:
   List::BinarySearch:
     file: lib/List/BinarySearch.pm
-    version: '0.23'
+    version: '0.24'
   List::BinarySearch::PP:
     file: lib/List/BinarySearch/PP.pm
-    version: '0.23'
+    version: '0.24'
 recommends:
   List::BinarySearch::XS: '0.06'
 requires:
@@ -33,4 +33,4 @@ requires:
 resources:
   bugtracker: https://github.com/daoswald/List-BinarySearch/issues
   repository: https://github.com/daoswald/List-BinarySearch.git
-version: '0.23'
+version: '0.24'

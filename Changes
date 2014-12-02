@@ -1,5 +1,8 @@
 Revision history for List::BinarySearch
 
+0.24 2014-12-02
+  - Fix SYNOPSIS typos in L::BS and L::BS::PP (Closes GH issue #1).
+
 0.23 2014-12-01
   - Remove some diagnostics code.
 
