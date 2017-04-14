@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use ExtUtils::MakeMaker;
+use Getopt::Std;
 
 ## no critic (may require interpolation eval)
 
@@ -11,10 +12,20 @@ use constant DIST_VERSION => '0.25';
 
 my $prereq_pm = { 'Scalar::Util' => '0' };
 
+my %opt;
+getopts( 'ny', \%opt )
+    and not ( $opt{y} && $opt{n} )
+    or die <<EOD;
+The only legal options are:
+  -y = install List::BinarySearch::XS if not present,
+  -n = do not install List::BinarySearch::XS.
+You may not assert both of these at once - it is too confusing.
+EOD
+
 if( ! eval 'use List::BinarySearch::XS; 1;' ) {
   my $answer = 'n';
   unless( $ENV{LBS_NO_XS} ) {
-    $answer =
+    $answer = $opt{y} ? 'y' : $opt{n} ? 'n' :
       prompt <<'EOP' . 'Would you like to install List::BinarySearch::XS?', 'y';
 
 List::BinarySearch::XS is not installed.
@@ -53,6 +64,7 @@ WriteMakefile(
     MIN_PERL_VERSION   => '5.008000',
     PL_FILES           => {},
     CONFIGURE_REQUIRES => {
+	'Getopt::Std'         => 0,
         'ExtUtils::MakeMaker' => '6.62',    # Core, but updated version.
     },
     BUILD_REQUIRES => {
